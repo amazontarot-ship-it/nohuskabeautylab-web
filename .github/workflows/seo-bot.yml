@@ -1,0 +1,36 @@
+name: Nohuska SEO Bot
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "15 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seo-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Revisar la web
+        uses: actions/checkout@v4
+      - name: Ejecutar auditoría SEO
+        id: audit
+        continue-on-error: true
+        run: python scripts/seo_audit.py
+      - name: Mostrar informe
+        if: always()
+        run: cat seo-report/report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Guardar informe descargable
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-seo-nohuska
+          path: seo-report/
+          retention-days: 30
+      - name: Bloquear errores críticos
+        if: steps.audit.outcome == 'failure'
+        run: exit 1
