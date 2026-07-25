@@ -2,7 +2,7 @@
 
 ## Datos que debe confirmar la propietaria
 
-- Dominio definitivo: el proyecto usa `https://nohuskabeautylab.com/`.
+- Dominio definitivo: el proyecto usa `https://nohuska.com/`.
 - Nombre o razón social y NIF/CIF para el aviso legal y privacidad.
 - Código postal, horario real y enlace definitivo de Google Business Profile.
 - Que dirección, teléfono, correo e Instagram sean correctos.

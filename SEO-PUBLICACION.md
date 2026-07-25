@@ -1,6 +1,6 @@
-﻿# Publicación SEO de Nohuska Beauty Lab
+# Publicación SEO de Nohuska Beauty Lab
 
-La web está preparada para publicarse en `https://nohuskabeautylab.com/`. Si el dominio definitivo es distinto, deben cambiarse las etiquetas `canonical`, las URLs de los datos estructurados, `sitemap.xml` y `robots.txt` antes de publicar.
+La web está preparada para publicarse en `https://nohuska.com/`. Si el dominio definitivo es distinto, deben cambiarse las etiquetas `canonical`, las URLs de los datos estructurados, `sitemap.xml` y `robots.txt` antes de publicar.
 
 ## Datos que deben confirmarse
 
@@ -12,9 +12,9 @@ La web está preparada para publicarse en `https://nohuskabeautylab.com/`. Si el
 ## Google Search Console
 
 1. Publicar la web bajo HTTPS.
-2. Crear una propiedad de dominio para `nohuskabeautylab.com`.
+2. Crear una propiedad de dominio para `nohuska.com`.
 3. Verificarla mediante el registro DNS que proporcione Google.
-4. Enviar `https://nohuskabeautylab.com/sitemap.xml` desde el informe Sitemaps.
+4. Enviar `https://nohuska.com/sitemap.xml` desde el informe Sitemaps.
 5. Inspeccionar la portada y cada página de tratamiento; solicitar indexación cuando no existan errores.
 6. Validar el marcado con Rich Results Test después de publicar.
 
@@ -60,7 +60,7 @@ La web está preparada para publicarse en `https://nohuskabeautylab.com/`. Si el
 - Teléfono definitivo confirmado: +34 624 011 715. Los números utilizados en materiales anteriores deben descartarse.
 - Dirección completa y código postal.
 - Horario habitual y festivos.
-- Dominio definitivo y funcionamiento del correo info@nohuskabeautylab.com.
+- Dominio definitivo y funcionamiento del correo info@nohuska.com.
 - Fotografías de trabajos reales con autorización para completar la galería propia.
 - Datos fiscales necesarios para aviso legal y política de privacidad.
 - Perfil de Empresa de Google y enlace directo para solicitar reseñas.
