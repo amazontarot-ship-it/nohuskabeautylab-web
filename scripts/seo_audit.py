@@ -13,7 +13,7 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
-DOMAIN = "https://nohuskabeautylab.com"
+DOMAIN = "https://nohuska.com"
 EXCLUDED = {"404.html", "aviso-legal.html", "cookies.html", "privacidad.html"}
 
 
@@ -77,7 +77,7 @@ def local_target(source: Path, href: str) -> Path | None:
     if href.startswith(("#", "mailto:", "tel:", "javascript:", "https://wa.me/")):
         return None
     parsed = urlparse(href)
-    if parsed.netloc and parsed.netloc not in {"nohuskabeautylab.com", "www.nohuskabeautylab.com"}:
+    if parsed.netloc and parsed.netloc not in {"nohuska.com", "www.nohuska.com"}:
         return None
     raw = parsed.path
     if parsed.netloc:
