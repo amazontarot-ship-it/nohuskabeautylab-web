@@ -238,17 +238,22 @@
     .treatments .section-head>p{color:#abc0bb}
     .treatment-groups{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
     .treatment-group{background:var(--mineral-2);border:1px solid rgba(255,255,255,.1);overflow:hidden}
-    .treatment-group summary{list-style:none;min-height:132px;padding:28px 30px;display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;cursor:pointer}
-    .treatment-group summary::-webkit-details-marker{display:none}
+    .treatment-group>summary{list-style:none;min-height:132px;padding:28px 30px;display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;cursor:pointer}
+    .treatment-group>summary::-webkit-details-marker{display:none}
     .group-no{font:400 35px "Playfair Display",serif;color:var(--champagne)}
     .group-title small{display:block;margin-bottom:7px;color:var(--turquoise-soft);font:700 8px "Manrope",sans-serif;letter-spacing:.18em;text-transform:uppercase}
     .group-title strong{font:400 31px "Playfair Display",serif}
     .group-toggle{width:42px;height:42px;border:1px solid rgba(255,255,255,.2);border-radius:50%;display:grid;place-items:center;color:var(--turquoise-soft);transition:.25s}
-    details[open] .group-toggle{transform:rotate(45deg)}
+    .treatment-group[open]>.group-toggle,.treatment-group[open]>summary .group-toggle{transform:rotate(45deg)}
     .group-body{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;padding:0 30px 30px}
-    .treatment-link{display:flex;align-items:center;gap:14px;padding:15px 0;border-top:1px solid rgba(255,255,255,.11);color:#d7e2df;font-size:13px;transition:.2s}
-    a.treatment-link::after{content:"↗";margin-left:auto;color:var(--turquoise-soft)}
-    a.treatment-link:hover{padding-left:8px;color:white}
+    .treatment-item{border-top:1px solid rgba(255,255,255,.11);color:#d7e2df}
+    .treatment-item>summary{list-style:none;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:15px 0;cursor:pointer;font-size:13px}
+    .treatment-item>summary::-webkit-details-marker{display:none}
+    .treatment-name{line-height:1.45}
+    .treatment-more{color:var(--turquoise-soft);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+    .treatment-more::after{content:" +";font-size:12px}
+    .treatment-item[open] .treatment-more::after{content:" −"}
+    .treatment-description{margin:0;padding:0 0 17px;color:#abc0bb;font-size:11px;line-height:1.65}
     .capillary-section{background:var(--paper)}
     .capillary-showcase{display:grid;grid-template-columns:.72fr 1.28fr;background:var(--paper);color:var(--mineral);border:1px solid var(--line)}
     .capillary-copy{padding:42px;display:flex;flex-direction:column;justify-content:center}
@@ -474,9 +479,10 @@
       .safety-grid{grid-template-columns:1fr}
       .safety-item,.safety-item:nth-child(2n),.safety-item:nth-last-child(-n+2){min-height:0;border-right:0;border-bottom:1px solid var(--line)}
       .safety-item:last-child{border-bottom:0}
-      .treatment-group summary{min-height:110px;padding:22px 18px;gap:14px}
+      .treatment-group>summary{min-height:110px;padding:22px 18px;gap:14px}
       .group-title strong{font-size:27px}
       .group-body{grid-template-columns:1fr;padding:0 18px 22px}
+      .treatment-item>summary{min-height:0;padding:15px 0;gap:10px}
       .film-grid{height:auto;grid-template-columns:1fr}
       .film{height:570px}
       .film:first-child{margin:0}
@@ -742,62 +748,155 @@
           <details class="treatment-group reveal" id="cejas" open>
             <summary><span class="group-no">01</span><span class="group-title"><small>Diseño y expresión</small><strong>Cejas</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <a class="treatment-link" href="tratamientos/nohuska-natural-brow-granollers.html"><span>Diseño personalizado</span></a>
-              <a class="treatment-link" href="tratamientos/nohuska-natural-brow-granollers.html"><span>Depilación de cejas</span></a>
-              <a class="treatment-link" href="tratamientos/nohuska-natural-brow-granollers.html"><span>Laminado de cejas</span></a>
-              <a class="treatment-link" href="tratamientos/nohuska-natural-brow-granollers.html"><span>Experiencia Nohuska Brow™</span></a>
-              <a class="treatment-link" href="tratamientos/tinte-hibrido-cejas-granollers.html"><span>Tinte híbrido</span></a>
-              <a class="treatment-link" href="tratamientos/powder-brows-granollers.html"><span>Hair Stroke</span></a>
-              <a class="treatment-link" href="tratamientos/powder-brows-granollers.html"><span>Powder Brows</span></a>
-              <a class="treatment-link" href="tratamientos/micropigmentacion-granollers.html"><span>Micropigmentación de cejas</span></a>
-              <a class="treatment-link" href="tratamientos/micropigmentacion-granollers.html"><span>Retoque anual de cejas</span></a>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Diseño personalizado</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Estudiamos proporciones, expresión y crecimiento natural para crear una forma de ceja adaptada a tu rostro.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Depilación de cejas</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Definimos y limpiamos la forma respetando el diseño y la densidad natural de tus cejas.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Laminado de cejas</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Peinamos y orientamos el pelo para conseguir unas cejas más ordenadas, flexibles y visualmente densas.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Experiencia Nohuska Brow™</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Nuestro protocolo combina diagnóstico, diseño, arquitectura, laminado y color profesional según tus rasgos.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Tinte híbrido</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Aporta definición y uniformidad al pelo de la ceja con un tono elegido para integrarse de forma natural.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Hair Stroke</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Diseño de trazos finos que imitan el pelo para completar zonas y definir la ceja con un acabado natural.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Powder Brows</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Micropigmentación con efecto sombreado suave y graduado para unas cejas definidas sin líneas duras.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Micropigmentación de cejas</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Diseñamos forma, técnica y pigmento de manera personalizada para equilibrar y realzar la mirada.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Retoque anual de cejas</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Valoramos la evolución del pigmento y, cuando corresponde, renovamos tono y definición manteniendo el diseño.</p>
+              </details>
             </div>
           </details>
           <details class="treatment-group reveal" id="pestanas" open>
             <summary><span class="group-no">02</span><span class="group-title"><small>Apertura y ligereza</small><strong>Pestañas</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <a class="treatment-link" href="tratamientos/lifting-pestanas-granollers.html"><span>Lifting de pestañas</span></a>
-              <a class="treatment-link" href="tratamientos/lifting-pestanas-granollers.html"><span>Lifting con tinte</span></a>
-              <a class="treatment-link" href="tratamientos/lifting-pestanas-granollers.html"><span>Tinte de pestañas</span></a>
-              <a class="treatment-link" href="tratamientos/extensiones-pestanas-granollers.html"><span>Extensiones efecto natural</span></a>
-              <a class="treatment-link" href="tratamientos/extensiones-pestanas-granollers.html"><span>Relleno de extensiones</span></a>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Lifting de pestañas</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Elevamos y curvamos tus pestañas naturales para abrir visualmente la mirada sin añadir extensiones.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Lifting con tinte</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Combina elevación y color para destacar incluso las puntas más claras de la pestaña natural.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Tinte de pestañas</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Oscurece y uniforma visualmente la pestaña natural para conseguir una mirada más marcada.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Extensiones efecto natural</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Personalizamos longitud, curvatura y densidad para realzar la mirada con un resultado ligero y equilibrado.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Relleno de extensiones</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Mantenimiento de las extensiones existentes para recuperar uniformidad tras la renovación natural de las pestañas.</p>
+              </details>
             </div>
           </details>
           <details class="treatment-group reveal" id="labios" open>
             <summary><span class="group-no">03</span><span class="group-title"><small>Hidratación y color</small><strong>Labios</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <a class="treatment-link" href="tratamientos/micropigmentacion-labios-granollers.html"><span>Hydra Lips</span></a>
-              <a class="treatment-link" href="tratamientos/micropigmentacion-labios-granollers.html"><span>Candy Lips / Powder Lips</span></a>
-              <a class="treatment-link" href="tratamientos/micropigmentacion-labios-granollers.html"><span>Labios 3D</span></a>
-              <a class="treatment-link" href="tratamientos/micropigmentacion-labios-granollers.html"><span>Dark Lips</span></a>
-              <a class="treatment-link" href="tratamientos/micropigmentacion-labios-granollers.html"><span>Retoque anual de labios</span></a>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Hydra Lips</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Protocolo cosmético orientado a mejorar la hidratación, suavidad y aspecto cuidado de los labios.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Candy Lips / Powder Lips</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Micropigmentación labial de color suave y difuminado, diseñada según tu tono natural y el acabado deseado.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Labios 3D</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Trabajo personalizado de contorno, transición y color para aportar una sensación visual de mayor dimensión.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Dark Lips</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Protocolo de colorimetría para labios con pigmentación oscura, siempre planificado tras una valoración individual.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Retoque anual de labios</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Revisamos cómo ha evolucionado el color y renovamos el pigmento cuando el resultado y la piel lo aconsejan.</p>
+              </details>
             </div>
           </details>
           <details class="treatment-group reveal" id="rostro" open>
             <summary><span class="group-no">04</span><span class="group-title"><small>Luz y dimensión</small><strong>Rostro</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <a class="treatment-link" href="tratamientos/micropigmentacion-pecas-granollers.html"><span>Micropigmentación de pecas</span></a>
-              <a class="treatment-link" href="tratamientos/micropigmentacion-blush-granollers.html"><span>Micropigmentación Blush</span></a>
-              <a class="treatment-link" href="tratamientos/facial-contouring-granollers.html"><span>Facial Contouring</span></a>
-              <a class="treatment-link" href="tratamientos/camuflaje-ojeras-granollers.html"><span>Camuflaje de ojeras</span></a>
-              <a class="treatment-link" href="tratamientos/guia-tratamientos-nohuska.html"><span>Beauty Spot · lunares</span></a>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Micropigmentación de pecas</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Creamos freckles semipermanentes con tono, tamaño y distribución irregular adaptados a tu rostro.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Micropigmentación Blush</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Diseño de pigmentación suave para aportar un efecto de vitalidad y dimensión integrado en el rostro.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Facial Contouring</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Estudio y trabajo de luces y sombras pensado para realzar visualmente la estructura natural del rostro.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Camuflaje de ojeras</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Aplicamos colorimetría para suavizar visualmente diferencias de tono, siempre sujeto a valoración previa.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Beauty Spot · lunares</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Creamos un punto de belleza semipermanente con ubicación, tamaño y tono definidos de forma personalizada.</p>
+              </details>
             </div>
           </details>
           <details class="treatment-group reveal" id="skincare" open>
             <summary><span class="group-no">05</span><span class="group-title"><small>Cuidado y luminosidad</small><strong>Skincare</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <a class="treatment-link" href="tratamientos/limpieza-facial-coreana-granollers.html"><span>Limpieza facial vegana y coreana</span></a>
-              <a class="treatment-link" href="tratamientos/limpieza-facial-coreana-granollers.html"><span>Valoración de la piel</span></a>
-              <a class="treatment-link" href="tratamientos/limpieza-facial-coreana-granollers.html"><span>Asesoramiento de rutina</span></a>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Limpieza facial vegana y coreana</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Ritual facial por fases con cosmética vegana, adaptado al estado y las necesidades de tu piel.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Valoración de la piel</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Observamos el estado de la piel, tus hábitos y objetivos para recomendar un cuidado coherente y personalizado.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Asesoramiento de rutina</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Organizamos una rutina de cuidado sencilla y realista según tu tipo de piel y tus necesidades cotidianas.</p>
+              </details>
             </div>
           </details>
           <details class="treatment-group reveal" id="capilar" open>
             <summary><span class="group-no">06</span><span class="group-title"><small>Densidad y confianza</small><strong>Capilar</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <a class="treatment-link" href="tratamientos/micropigmentacion-capilar-granollers.html"><span>Valoración capilar</span></a>
-              <a class="treatment-link" href="tratamientos/micropigmentacion-capilar-granollers.html"><span>Corrección de entradas</span></a>
-              <a class="treatment-link" href="tratamientos/micropigmentacion-capilar-granollers.html"><span>Efecto densidad parcial</span></a>
-              <a class="treatment-link" href="tratamientos/micropigmentacion-capilar-granollers.html"><span>Micropigmentación completa</span></a>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Valoración capilar</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Analizamos la zona, el tono y el objetivo estético para definir si la micropigmentación capilar es adecuada.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Corrección de entradas</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Diseñamos una transición visual equilibrada en las entradas respetando la línea y el crecimiento existentes.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Efecto densidad parcial</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Micropigmentación localizada para reducir visualmente el contraste entre cuero cabelludo y cabello.</p>
+              </details>
+              <details class="treatment-item">
+                <summary><span class="treatment-name">Micropigmentación completa</span><span class="treatment-more">Saber más</span></summary>
+                <p class="treatment-description">Planificamos línea, tono y distribución de puntos para crear un efecto capilar uniforme y personalizado.</p>
+              </details>
             </div>
           </details>
         </div>
@@ -947,10 +1046,22 @@
           </div>
         </div>
       </div>
-      <nav class="footer-seo-links" aria-label="Tratamientos y zonas">
-        <strong>Tratamientos y zonas</strong>
+      <nav class="footer-seo-links" aria-label="Información detallada de tratamientos y zonas">
+        <strong>Información detallada de tratamientos y zonas</strong>
         <a href="tratamientos/guia-tratamientos-nohuska.html">Guía de tratamientos</a>
+        <a href="tratamientos/nohuska-natural-brow-granollers.html">Diseño y laminado de cejas</a>
+        <a href="tratamientos/tinte-hibrido-cejas-granollers.html">Tinte híbrido de cejas</a>
+        <a href="tratamientos/powder-brows-granollers.html">Powder Brows Granollers</a>
         <a href="tratamientos/micropigmentacion-granollers.html">Micropigmentación Granollers</a>
+        <a href="tratamientos/micropigmentacion-labios-granollers.html">Micropigmentación de labios</a>
+        <a href="tratamientos/micropigmentacion-pecas-granollers.html">Micropigmentación de pecas</a>
+        <a href="tratamientos/micropigmentacion-blush-granollers.html">Micropigmentación Blush</a>
+        <a href="tratamientos/facial-contouring-granollers.html">Facial Contouring</a>
+        <a href="tratamientos/camuflaje-ojeras-granollers.html">Camuflaje de ojeras</a>
+        <a href="tratamientos/lifting-pestanas-granollers.html">Lifting de pestañas</a>
+        <a href="tratamientos/extensiones-pestanas-granollers.html">Extensiones de pestañas</a>
+        <a href="tratamientos/limpieza-facial-coreana-granollers.html">Limpieza facial coreana</a>
+        <a href="tratamientos/micropigmentacion-capilar-granollers.html">Micropigmentación capilar</a>
         <a href="tratamientos/micropigmentacion-barcelona.html">Micropigmentación Barcelona</a>
         <a href="tratamientos/micropigmentacion-valles-oriental.html">Micropigmentación Vallès Oriental</a>
         <a href="tratamientos/freckles-barcelona.html">Freckles Barcelona</a>
