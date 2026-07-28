@@ -91,7 +91,7 @@
       --mineral-2:#183632;
       --ivory:#f7f3ec;
       --paper:#fffdf9;
-      --turquoise:#12aaa9;
+      --turquoise:#087b79;
       --turquoise-soft:#bce8e3;
       --champagne:#bd9769;
       --skin:#d9bba5;
@@ -109,11 +109,11 @@
     button{font:inherit;cursor:pointer}
     .wrap{width:min(1240px,calc(100% - 48px));margin:auto}
     .serif{font-family:"Playfair Display",Georgia,serif;font-weight:500;letter-spacing:-.038em;line-height:.99}
-    .eyebrow{margin:0;color:#078b8a;font:700 10px/1.4 "Manrope",sans-serif;letter-spacing:.23em;text-transform:uppercase}
+    .eyebrow{margin:0;color:var(--turquoise);font:700 10px/1.4 "Manrope",sans-serif;letter-spacing:.23em;text-transform:uppercase}
     .button{display:inline-flex;min-height:56px;align-items:center;justify-content:center;gap:22px;padding:0 24px;border:1px solid transparent;font:700 10px/1 "Manrope",sans-serif;letter-spacing:.1em;text-transform:uppercase;transition:.25s}
     .button::after{content:"↗";font-size:15px}
     .button-primary{background:var(--turquoise);color:white}
-    .button-primary:hover{background:#0c8786;transform:translateY(-2px)}
+    .button-primary:hover{background:#066d6b;transform:translateY(-2px)}
     .button-outline{border-color:var(--line);background:transparent}
     .button-outline:hover{border-color:var(--turquoise);color:var(--turquoise)}
 
@@ -123,7 +123,8 @@
     .brand-mark{display:none}
     .wordmark{display:grid;line-height:1}
     .wordmark strong{font:500 32px/1 "Playfair Display",serif;letter-spacing:.16em}
-    .wordmark small{margin-top:7px;color:#078b8a;font:700 8px/1 "Manrope",sans-serif;letter-spacing:.44em}
+    .wordmark small{margin-top:7px;color:var(--turquoise);font:700 8px/1 "Manrope",sans-serif;letter-spacing:.44em}
+    a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--champagne);outline-offset:4px}
     .navlinks{display:flex;align-items:center;gap:24px;font:700 9px/1 "Manrope",sans-serif;letter-spacing:.075em;text-transform:uppercase;white-space:nowrap}
     .navlinks>a:not(.button){padding:12px 0}
     .navlinks>a:not(.button):hover{color:var(--turquoise)}
@@ -242,7 +243,9 @@
     .group-toggle{width:42px;height:42px;border:1px solid rgba(255,255,255,.2);border-radius:50%;display:grid;place-items:center;color:var(--turquoise-soft);transition:.25s}
     details[open] .group-toggle{transform:rotate(45deg)}
     .group-body{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;padding:0 30px 30px}
-    .treatment-link{display:flex;align-items:center;gap:14px;padding:15px 0;border-top:1px solid rgba(255,255,255,.11);color:#d7e2df;font-size:13px}
+    .treatment-link{display:flex;align-items:center;gap:14px;padding:15px 0;border-top:1px solid rgba(255,255,255,.11);color:#d7e2df;font-size:13px;transition:.2s}
+    a.treatment-link::after{content:"↗";margin-left:auto;color:var(--turquoise-soft)}
+    a.treatment-link:hover{padding-left:8px;color:white}
     .capillary-section{background:var(--paper)}
     .capillary-showcase{display:grid;grid-template-columns:.72fr 1.28fr;background:var(--paper);color:var(--mineral);border:1px solid var(--line)}
     .capillary-copy{padding:42px;display:flex;flex-direction:column;justify-content:center}
@@ -354,6 +357,9 @@
     .footer-links a:hover{color:var(--turquoise-soft)}
     .footer-social{display:inline-flex;align-items:center;gap:9px}
     .footer-social svg{width:18px;height:18px;flex:0 0 auto;color:var(--turquoise-soft)}
+    .footer-seo-links{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:34px;padding-top:22px;border-top:1px solid rgba(255,255,255,.1);font-size:11px}
+    .footer-seo-links strong{width:100%;color:white;font:700 9px "Manrope",sans-serif;letter-spacing:.15em;text-transform:uppercase}
+    .footer-seo-links a:hover{color:var(--turquoise-soft)}
     .footer-bottom{display:flex;justify-content:space-between;gap:25px;margin-top:45px;padding-top:20px;border-top:1px solid rgba(255,255,255,.1);font-size:10px}
 
     .mobile-cta{display:none}
@@ -525,7 +531,7 @@
         </div>
         <div class="hero-visual reveal" aria-label="Proceso real de Nohuska Beauty Lab">
           <div class="hero-film">
-            <video class="always-loop" data-loop data-keep-alive src="assets/video-resultado-cejas-real.mp4" poster="assets/poster-video-principal.jpg" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Proceso real de diseño de cejas en Nohuska Beauty Lab"></video>
+            <video class="always-loop" data-loop data-keep-alive src="assets/video-resultado-cejas-real.mp4" poster="assets/poster-video-principal.jpg" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Proceso real de diseño de cejas en Nohuska Beauty Lab"><track kind="captions" srclang="es" label="Vídeo sin audio" src="assets/video-sin-audio.vtt"></video>
             <div class="hero-film-label">
               <small>Proceso real · Nohuska</small>
               <strong>Precisión que se ve. Naturalidad que se siente.</strong>
@@ -561,9 +567,9 @@
           <p>Cuatro especialidades creadas para realzar sin borrar tu identidad. Diseño propio, intención precisa y resultados pensados para convivir con tu rostro.</p>
         </div>
         <div class="star-grid">
-          <article class="star-card reveal">
+          <a class="star-card reveal" href="tratamientos/nohuska-natural-brow-granollers.html" aria-label="Conocer la Experiencia Nohuska Brow en Granollers">
             <div class="star-media">
-              <video class="always-loop" data-loop src="assets/video-nohuska-brow.mp4" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Técnica real de diseño de cejas en la Experiencia Nohuska Brow"></video>
+              <video class="always-loop" data-loop src="assets/video-nohuska-brow.mp4" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Técnica real de diseño de cejas en la Experiencia Nohuska Brow"><track kind="captions" srclang="es" label="Vídeo sin audio" src="assets/video-sin-audio.vtt"></video>
               <span class="star-number">01</span>
             </div>
             <div class="star-content">
@@ -573,10 +579,10 @@
                 <p>Diseño, arquitectura, laminado y color profesional para unas cejas que enmarcan tu mirada sin perder naturalidad.</p>
               </div>
             </div>
-          </article>
-          <article class="star-card reveal">
+          </a>
+          <a class="star-card reveal" href="tratamientos/micropigmentacion-pecas-granollers.html" aria-label="Conocer la micropigmentación de pecas en Granollers">
             <div class="star-media">
-              <video class="always-loop" data-loop src="assets/video-pecas-nohuska.mp4" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Proceso real de micropigmentación de pecas en Nohuska Beauty Lab"></video>
+              <video class="always-loop" data-loop src="assets/video-pecas-nohuska.mp4" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Proceso real de micropigmentación de pecas en Nohuska Beauty Lab"><track kind="captions" srclang="es" label="Vídeo sin audio" src="assets/video-sin-audio.vtt"></video>
               <span class="star-number">02</span>
             </div>
             <div class="star-content">
@@ -586,12 +592,12 @@
                 <p>Pecas diseñadas una a una, adaptando distribución, intensidad y tonalidad para crear un efecto vivo y personal.</p>
               </div>
             </div>
-          </article>
+          </a>
         </div>
         <div class="star-secondary">
-          <article class="star-card reveal">
+          <a class="star-card reveal" href="tratamientos/micropigmentacion-blush-granollers.html" aria-label="Conocer la micropigmentación Blush en Granollers">
             <div class="star-media">
-              <video class="always-loop" data-loop src="assets/video-tratamiento-162636.mp4" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Proceso de Micropigmentación Blush con guantes negros"></video>
+              <video class="always-loop" data-loop src="assets/video-tratamiento-162636.mp4" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Proceso de Micropigmentación Blush con guantes negros"><track kind="captions" srclang="es" label="Vídeo sin audio" src="assets/video-sin-audio.vtt"></video>
               <span class="star-number">03</span>
             </div>
             <div class="star-content">
@@ -601,10 +607,10 @@
                 <p>Efecto rubor diseñado para aportar vitalidad y dimensión al rostro.</p>
               </div>
             </div>
-          </article>
-          <article class="star-card reveal">
+          </a>
+          <a class="star-card reveal" href="tratamientos/facial-contouring-granollers.html" aria-label="Conocer Facial Contouring en Granollers">
             <div class="star-media">
-              <video class="always-loop" data-loop src="assets/video-tratamiento-163819.mp4" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Proceso de Facial Contouring con guantes negros"></video>
+              <video class="always-loop" data-loop src="assets/video-tratamiento-163819.mp4" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Proceso de Facial Contouring con guantes negros"><track kind="captions" srclang="es" label="Vídeo sin audio" src="assets/video-sin-audio.vtt"></video>
               <span class="star-number">04</span>
             </div>
             <div class="star-content">
@@ -614,7 +620,7 @@
                 <p>Diseño estratégico para acompañar la estructura natural del rostro.</p>
               </div>
             </div>
-          </article>
+          </a>
         </div>
       </div>
     </section>
@@ -732,62 +738,62 @@
           <details class="treatment-group reveal" id="cejas" open>
             <summary><span class="group-no">01</span><span class="group-title"><small>Diseño y expresión</small><strong>Cejas</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <div class="treatment-link"><span>Diseño personalizado</span></div>
-              <div class="treatment-link"><span>Depilación de cejas</span></div>
-              <div class="treatment-link"><span>Laminado de cejas</span></div>
-              <div class="treatment-link"><span>Experiencia Nohuska Brow™</span></div>
-              <div class="treatment-link"><span>Tinte híbrido</span></div>
-              <div class="treatment-link"><span>Hair Stroke</span></div>
-              <div class="treatment-link"><span>Powder Brows</span></div>
-              <div class="treatment-link"><span>Micropigmentación de cejas</span></div>
-              <div class="treatment-link"><span>Retoque anual</span></div>
+              <a class="treatment-link" href="tratamientos/nohuska-natural-brow-granollers.html"><span>Diseño personalizado</span></a>
+              <a class="treatment-link" href="tratamientos/nohuska-natural-brow-granollers.html"><span>Depilación de cejas</span></a>
+              <a class="treatment-link" href="tratamientos/nohuska-natural-brow-granollers.html"><span>Laminado de cejas</span></a>
+              <a class="treatment-link" href="tratamientos/nohuska-natural-brow-granollers.html"><span>Experiencia Nohuska Brow™</span></a>
+              <a class="treatment-link" href="tratamientos/tinte-hibrido-cejas-granollers.html"><span>Tinte híbrido</span></a>
+              <a class="treatment-link" href="tratamientos/powder-brows-granollers.html"><span>Hair Stroke</span></a>
+              <a class="treatment-link" href="tratamientos/powder-brows-granollers.html"><span>Powder Brows</span></a>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-granollers.html"><span>Micropigmentación de cejas</span></a>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-granollers.html"><span>Retoque anual</span></a>
             </div>
           </details>
           <details class="treatment-group reveal" id="pestanas" open>
             <summary><span class="group-no">02</span><span class="group-title"><small>Apertura y ligereza</small><strong>Pestañas</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <div class="treatment-link"><span>Lifting de pestañas</span></div>
-              <div class="treatment-link"><span>Lifting con tinte</span></div>
-              <div class="treatment-link"><span>Tinte de pestañas</span></div>
-              <div class="treatment-link"><span>Extensiones efecto natural</span></div>
-              <div class="treatment-link"><span>Relleno de extensiones</span></div>
+              <a class="treatment-link" href="tratamientos/lifting-pestanas-granollers.html"><span>Lifting de pestañas</span></a>
+              <a class="treatment-link" href="tratamientos/lifting-pestanas-granollers.html"><span>Lifting con tinte</span></a>
+              <a class="treatment-link" href="tratamientos/lifting-pestanas-granollers.html"><span>Tinte de pestañas</span></a>
+              <a class="treatment-link" href="tratamientos/extensiones-pestanas-granollers.html"><span>Extensiones efecto natural</span></a>
+              <a class="treatment-link" href="tratamientos/extensiones-pestanas-granollers.html"><span>Relleno de extensiones</span></a>
             </div>
           </details>
           <details class="treatment-group reveal" id="labios" open>
             <summary><span class="group-no">03</span><span class="group-title"><small>Hidratación y color</small><strong>Labios</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <div class="treatment-link"><span>Hydra Lips</span></div>
-              <div class="treatment-link"><span>Candy Lips / Powder Lips</span></div>
-              <div class="treatment-link"><span>Labios 3D</span></div>
-              <div class="treatment-link"><span>Dark Lips</span></div>
-              <div class="treatment-link"><span>Retoque anual</span></div>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-labios-granollers.html"><span>Hydra Lips</span></a>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-labios-granollers.html"><span>Candy Lips / Powder Lips</span></a>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-labios-granollers.html"><span>Labios 3D</span></a>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-labios-granollers.html"><span>Dark Lips</span></a>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-labios-granollers.html"><span>Retoque anual</span></a>
             </div>
           </details>
           <details class="treatment-group reveal" id="rostro" open>
             <summary><span class="group-no">04</span><span class="group-title"><small>Luz y dimensión</small><strong>Rostro</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <div class="treatment-link"><span>Micropigmentación de pecas</span></div>
-              <div class="treatment-link"><span>Micropigmentación Blush</span></div>
-              <div class="treatment-link"><span>Facial Contouring</span></div>
-              <div class="treatment-link"><span>Camuflaje de ojeras</span></div>
-              <div class="treatment-link"><span>Beauty Spot · lunares</span></div>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-pecas-granollers.html"><span>Micropigmentación de pecas</span></a>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-blush-granollers.html"><span>Micropigmentación Blush</span></a>
+              <a class="treatment-link" href="tratamientos/facial-contouring-granollers.html"><span>Facial Contouring</span></a>
+              <a class="treatment-link" href="tratamientos/camuflaje-ojeras-granollers.html"><span>Camuflaje de ojeras</span></a>
+              <a class="treatment-link" href="tratamientos/guia-tratamientos-nohuska.html"><span>Beauty Spot · lunares</span></a>
             </div>
           </details>
           <details class="treatment-group reveal" id="skincare" open>
             <summary><span class="group-no">05</span><span class="group-title"><small>Cuidado y luminosidad</small><strong>Skincare</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <div class="treatment-link"><span>Limpieza facial vegana y coreana</span></div>
-              <div class="treatment-link"><span>Valoración de la piel</span></div>
-              <div class="treatment-link"><span>Asesoramiento de rutina</span></div>
+              <a class="treatment-link" href="tratamientos/limpieza-facial-coreana-granollers.html"><span>Limpieza facial vegana y coreana</span></a>
+              <a class="treatment-link" href="tratamientos/limpieza-facial-coreana-granollers.html"><span>Valoración de la piel</span></a>
+              <a class="treatment-link" href="tratamientos/limpieza-facial-coreana-granollers.html"><span>Asesoramiento de rutina</span></a>
             </div>
           </details>
           <details class="treatment-group reveal" id="capilar" open>
             <summary><span class="group-no">06</span><span class="group-title"><small>Densidad y confianza</small><strong>Capilar</strong></span><span class="group-toggle">+</span></summary>
             <div class="group-body">
-              <div class="treatment-link"><span>Valoración capilar</span></div>
-              <div class="treatment-link"><span>Corrección de entradas</span></div>
-              <div class="treatment-link"><span>Efecto densidad parcial</span></div>
-              <div class="treatment-link"><span>Micropigmentación completa</span></div>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-capilar-granollers.html"><span>Valoración capilar</span></a>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-capilar-granollers.html"><span>Corrección de entradas</span></a>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-capilar-granollers.html"><span>Efecto densidad parcial</span></a>
+              <a class="treatment-link" href="tratamientos/micropigmentacion-capilar-granollers.html"><span>Micropigmentación completa</span></a>
             </div>
           </details>
         </div>
@@ -856,7 +862,7 @@
             <a class="button button-primary" href="https://wa.me/34624011715?text=Hola%20Nohuska%2C%20quiero%20solicitar%20una%20valoraci%C3%B3n%20capilar." target="_blank" rel="noopener">Solicitar valoración capilar</a>
           </div>
           <div class="capillary-media">
-            <video class="always-loop" data-loop src="assets/video-capilar-nohuska.mp4" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Proceso real de micropigmentación capilar en Nohuska Beauty Lab"></video>
+            <video class="always-loop" data-loop src="assets/video-capilar-nohuska.mp4" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Proceso real de micropigmentación capilar en Nohuska Beauty Lab"><track kind="captions" srclang="es" label="Vídeo sin audio" src="assets/video-sin-audio.vtt"></video>
           </div>
         </article>
       </div>
@@ -923,6 +929,9 @@
             <a href="#reserva">Contacto y horario</a>
             <a href="https://maps.google.com/?q=Avinguda+Sant+Esteve+40+08400+Granollers" target="_blank" rel="noopener">Cómo llegar</a>
             <a href="mailto:info@nohuska.com">Escríbenos</a>
+            <a href="privacidad.html">Política de privacidad</a>
+            <a href="cookies.html">Política de cookies</a>
+            <a href="aviso-legal.html">Aviso legal</a>
             <a class="footer-social" href="https://www.instagram.com/hello.nohuska" target="_blank" rel="noopener" aria-label="Instagram de Nohuska Beauty Lab, @hello.nohuska">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/>
@@ -934,6 +943,17 @@
           </div>
         </div>
       </div>
+      <nav class="footer-seo-links" aria-label="Tratamientos y zonas">
+        <strong>Tratamientos y zonas</strong>
+        <a href="tratamientos/guia-tratamientos-nohuska.html">Guía de tratamientos</a>
+        <a href="tratamientos/micropigmentacion-granollers.html">Micropigmentación Granollers</a>
+        <a href="tratamientos/micropigmentacion-barcelona.html">Micropigmentación Barcelona</a>
+        <a href="tratamientos/micropigmentacion-valles-oriental.html">Micropigmentación Vallès Oriental</a>
+        <a href="tratamientos/freckles-barcelona.html">Freckles Barcelona</a>
+        <a href="tratamientos/freckles-valles-oriental.html">Freckles Vallès Oriental</a>
+        <a href="tratamientos/pestanas-barcelona.html">Pestañas Barcelona</a>
+        <a href="tratamientos/pestanas-valles-oriental.html">Pestañas Vallès Oriental</a>
+      </nav>
       <div class="footer-bottom"><span>© 2026 Nohuska Beauty Lab</span><span>Vegan & cruelty-free · Granollers</span></div>
     </div>
   </footer>
@@ -950,12 +970,14 @@
       const open=navLinks.classList.toggle("open");
       document.body.classList.toggle("menu-open",open);
       menuButton.setAttribute("aria-expanded",open);
+      menuButton.setAttribute("aria-label",open?"Cerrar menú":"Abrir menú");
       menuButton.textContent=open?"×":"☰";
     });
     navLinks.querySelectorAll("a").forEach(link=>link.addEventListener("click",()=>{
       navLinks.classList.remove("open");
       document.body.classList.remove("menu-open");
       menuButton.setAttribute("aria-expanded","false");
+      menuButton.setAttribute("aria-label","Abrir menú");
       menuButton.textContent="☰";
     }));
     document.querySelectorAll(".reveal").forEach(element=>element.classList.add("visible"));
