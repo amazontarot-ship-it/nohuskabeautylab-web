@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Revisar la web
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Ejecutar auditoría SEO
         id: audit
@@ -30,7 +30,7 @@ jobs:
 
       - name: Guardar informe descargable
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: informe-seo-nohuska
           path: seo-report/
@@ -38,7 +38,7 @@ jobs:
 
       - name: Crear aviso si hay errores
         if: steps.audit.outcome == 'failure' && github.event_name == 'schedule'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
