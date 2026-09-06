@@ -81,7 +81,9 @@
         {"@type":"OfferCatalog","name":"Experiencia Nohuska Brow"},
         {"@type":"OfferCatalog","name":"Micropigmentación Blush"},
         {"@type":"OfferCatalog","name":"Facial Contouring"},
-        {"@type":"OfferCatalog","name":"Cejas y pestañas"},
+        {"@type":"OfferCatalog","name":"Diseño, laminado y tinte de cejas"},
+        {"@type":"OfferCatalog","name":"Extensiones de pestañas"},
+        {"@type":"OfferCatalog","name":"Lifting y tinte de pestañas"},
         {"@type":"OfferCatalog","name":"Micropigmentación de labios"},
         {"@type":"OfferCatalog","name":"Skincare vegano y coreano"},
         {"@type":"OfferCatalog","name":"Micropigmentación capilar"}
@@ -258,6 +260,14 @@
     .treatment-more::after{content:" +";font-size:12px}
     .treatment-item[open] .treatment-more::after{content:" −"}
     .treatment-description{margin:0;padding:0 0 17px;color:#abc0bb;font-size:11px;line-height:1.65}
+    .seo-paths{background:var(--paper)}
+    .seo-paths-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .seo-path{min-height:330px;display:flex;flex-direction:column;padding:30px;border:1px solid var(--line);background:var(--ivory);transition:.25s}
+    .seo-path:hover{transform:translateY(-4px);background:white;box-shadow:0 22px 55px rgba(16,37,34,.08);border-color:var(--turquoise)}
+    .seo-path small{color:var(--turquoise);font:700 8px "Manrope",sans-serif;letter-spacing:.16em;text-transform:uppercase}
+    .seo-path h3{margin:20px 0 14px;font:500 30px/1.06 "Playfair Display",serif}
+    .seo-path p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}
+    .seo-path strong{margin-top:auto;padding-top:24px;color:var(--turquoise);font:700 9px "Manrope",sans-serif;letter-spacing:.1em;text-transform:uppercase}
     .capillary-section{background:var(--paper)}
     .capillary-showcase{display:grid;grid-template-columns:.72fr 1.28fr;background:var(--paper);color:var(--mineral);border:1px solid var(--line)}
     .capillary-copy{padding:42px;display:flex;flex-direction:column;justify-content:center}
@@ -466,6 +476,7 @@
       .need p{font-size:11px}
       .needs-layout{gap:24px}
       .treatment-groups{grid-template-columns:1fr}
+      .seo-paths-grid{grid-template-columns:1fr 1fr}
       .capillary-copy{padding:30px 20px}
       .capillary-copy h3{font-size:36px}
       .capillary-copy .button{width:100%}
@@ -487,6 +498,8 @@
       .group-title strong{font-size:27px}
       .group-body{grid-template-columns:1fr;padding:0 18px 22px}
       .treatment-item>summary{min-height:0;padding:15px 0;gap:10px}
+      .seo-paths-grid{grid-template-columns:1fr}
+      .seo-path{min-height:260px}
       .film-grid{height:auto;grid-template-columns:1fr}
       .film{height:570px}
       .film:first-child{margin:0}
@@ -907,6 +920,25 @@
       </div>
     </section>
 
+    <section class="section seo-paths" aria-labelledby="seo-paths-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div><p class="eyebrow">Guías para elegir</p><h2 class="serif" id="seo-paths-title">Encuentra tu tratamiento y tu zona.</h2></div>
+          <p>La lista anterior mantiene sus descripciones sin redirecciones. Estas guías independientes explican con detalle cada especialidad, la curación, los cuidados, la ubicación real y las opciones para Granollers, Vallès Oriental y Barcelona.</p>
+        </div>
+        <div class="seo-paths-grid">
+          <a class="seo-path" href="tratamientos/micropigmentacion-granollers.html"><small>Página central</small><h3>Micropigmentación natural</h3><p>Compara cejas, labios, pecas y Natural Brow™ antes de elegir técnica.</p><strong>Ver guía completa →</strong></a>
+          <a class="seo-path" href="tratamientos/micropigmentacion-labios-granollers.html"><small>Labios · prioridad</small><h3>Lip Blush y labios</h3><p>Candy Lips, Powder Lips, neutralización, elección de tono y evolución del pigmento.</p><strong>Valorar mis labios →</strong></a>
+          <a class="seo-path" href="tratamientos/micropigmentacion-pecas-granollers.html"><small>Signature Freckles</small><h3>Pecas hiperrealistas</h3><p>Distribución irregular, diferentes tamaños, tono personalizado y diseño previo.</p><strong>Diseñar mis pecas →</strong></a>
+          <a class="seo-path" href="tratamientos/limpieza-facial-coreana-granollers.html"><small>Skincare vegano</small><h3>Limpieza facial K-Beauty</h3><p>Diagnóstico, higiene por fases y una rutina personalizada para cuidar la piel.</p><strong>Valorar mi piel →</strong></a>
+          <a class="seo-path" href="tratamientos/cejas-valles-oriental.html"><small>Vallès Oriental</small><h3>Cejas y Natural Brow™</h3><p>Diseño, laminado o lifting, tinte, Powder Brows y micropigmentación.</p><strong>Ver tratamientos de cejas →</strong></a>
+          <a class="seo-path" href="tratamientos/pestanas-valles-oriental.html"><small>Vallès Oriental</small><h3>Extensiones, lifting y tinte</h3><p>Compara técnicas de pestañas según el resultado y el mantenimiento que deseas.</p><strong>Ver tratamientos de pestañas →</strong></a>
+          <a class="seo-path" href="tratamientos/freckles-barcelona.html"><small>Barcelona y provincia</small><h3>Freckles para Barcelona</h3><p>Consulta antes de desplazarte al estudio de Nohuska en Granollers.</p><strong>Consultar freckles →</strong></a>
+          <a class="seo-path" href="tratamientos/freckles-espana.html"><small>Consulta desde España</small><h3>Pecas y freckles</h3><p>Orientación previa a distancia y tratamiento presencial en Granollers, Barcelona.</p><strong>Organizar mi consulta →</strong></a>
+        </div>
+      </div>
+    </section>
+
     <section class="section authority" id="nohuska">
       <div class="wrap">
         <div class="authority-grid">
@@ -1061,6 +1093,7 @@
         <a href="tratamientos/powder-brows-granollers.html">Micropigmentación de cejas · Powder Brows</a>
         <a href="tratamientos/micropigmentacion-granollers.html">Micropigmentación en Granollers cerca de ti</a>
         <a href="tratamientos/micropigmentacion-labios-granollers.html">Micropigmentación de labios</a>
+        <a href="tratamientos/micropigmentacion-labios-barcelona.html">Micropigmentación de labios Barcelona</a>
         <a href="tratamientos/micropigmentacion-pecas-granollers.html">Micropigmentación de pecas</a>
         <a href="tratamientos/micropigmentacion-blush-granollers.html">Micropigmentación Blush</a>
         <a href="tratamientos/facial-contouring-granollers.html">Facial Contouring</a>
@@ -1068,11 +1101,14 @@
         <a href="tratamientos/lifting-pestanas-granollers.html">Lifting de pestañas</a>
         <a href="tratamientos/extensiones-pestanas-granollers.html">Extensiones de pestañas</a>
         <a href="tratamientos/limpieza-facial-coreana-granollers.html">Limpieza facial coreana</a>
+        <a href="tratamientos/limpieza-facial-valles-oriental.html">Limpieza facial Vallès Oriental</a>
         <a href="tratamientos/micropigmentacion-capilar-granollers.html">Micropigmentación capilar</a>
         <a href="tratamientos/micropigmentacion-barcelona.html">Micropigmentación Barcelona</a>
         <a href="tratamientos/micropigmentacion-valles-oriental.html">Micropigmentación Vallès Oriental</a>
         <a href="tratamientos/freckles-barcelona.html">Freckles Barcelona</a>
         <a href="tratamientos/freckles-valles-oriental.html">Freckles Vallès Oriental</a>
+        <a href="tratamientos/freckles-espana.html">Pecas y freckles España</a>
+        <a href="tratamientos/cejas-valles-oriental.html">Cejas Vallès Oriental</a>
         <a href="tratamientos/pestanas-barcelona.html">Pestañas Barcelona</a>
         <a href="tratamientos/pestanas-valles-oriental.html">Pestañas Vallès Oriental</a>
       </nav>
@@ -1164,5 +1200,4 @@
   </script>
 </body>
 </html>
-
 
