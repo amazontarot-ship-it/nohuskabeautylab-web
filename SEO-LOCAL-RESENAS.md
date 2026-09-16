@@ -39,3 +39,31 @@ En todas las menciones deben coincidir exactamente:
 - **Web:** https://nohuska.com/
 
 No comprar paquetes de enlaces, reseñas o publicaciones en directorios automáticos.
+
+## Casos reales y fotos nuevas
+
+Publicar un caso útil cada dos semanas, rotando en este orden:
+
+1. Cejas: antes, recién realizado y, cuando exista, resultado asentado.
+2. Labios: antes, recién realizado y curación, sin filtros que cambien el tono.
+3. Pecas: plano general y detalle, indicando el momento de la evolución.
+4. Pestañas: pestaña natural de partida, técnica utilizada y resultado.
+5. Limpieza facial: explicación del protocolo, espacio o productos; no prometer resultados médicos.
+
+Para cada publicación guardar autorización, fecha, tratamiento, momento de la evolución y localidad de procedencia. Una misma historia puede alimentar la página del tratamiento, el Perfil de Empresa y redes, adaptando el texto en lugar de duplicarlo literalmente.
+
+## Medición de contactos
+
+La web añade automáticamente al mensaje de WhatsApp una referencia como:
+
+`WEB-LABIOS-GRANOLLERS-GOOGLE-ORGANICO`
+
+La referencia identifica tratamiento, página geográfica y origen. Al recibirla:
+
+1. No borrar la referencia del primer mensaje.
+2. Registrar si terminó en valoración, cita o no reserva.
+3. Para una llamada telefónica, preguntar solo: “¿Nos has encontrado en Google Maps, en la web, en Instagram o por recomendación?”.
+4. Cada lunes contar contactos y citas por tratamiento y origen.
+5. Potenciar las páginas que generan citas, no solo las que generan visitas.
+
+Datos mínimos de seguimiento: fecha, tratamiento, origen, localidad de la clienta, valoración solicitada y cita confirmada. No guardar información médica en este registro comercial.
