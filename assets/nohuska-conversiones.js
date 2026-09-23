@@ -1,6 +1,115 @@
 (function () {
   "use strict";
 
+  var analyticsId = "G-EV7CGL8W75";
+  var consentKey = "nohuska_analytics_consent";
+
+  function getStoredConsent() {
+    try {
+      return window.localStorage.getItem(consentKey);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function storeConsent(value) {
+    try {
+      window.localStorage.setItem(consentKey, value);
+    } catch (error) {
+      // La elección sigue aplicándose durante esta visita si el almacenamiento está bloqueado.
+    }
+  }
+
+  function loadAnalytics() {
+    if (window.nohuskaAnalyticsLoaded) return;
+    if (!["nohuska.com", "www.nohuska.com"].includes(window.location.hostname)) return;
+
+    window.nohuskaAnalyticsLoaded = true;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function () {
+      window.dataLayer.push(arguments);
+    };
+    window.gtag("js", new Date());
+    window.gtag("config", analyticsId, {
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false
+    });
+
+    var script = document.createElement("script");
+    script.async = true;
+    script.src = "https://www.googletagmanager.com/gtag/js?id=" + analyticsId;
+    document.head.appendChild(script);
+  }
+
+  function deleteAnalyticsCookies() {
+    document.cookie.split(";").forEach(function (cookie) {
+      var name = cookie.split("=")[0].trim();
+      if (name === "_gid" || name.indexOf("_ga") === 0) {
+        document.cookie = name + "=; Max-Age=0; path=/; SameSite=Lax";
+        document.cookie = name + "=; Max-Age=0; path=/; domain=.nohuska.com; SameSite=Lax";
+      }
+    });
+  }
+
+  function removeConsentBanner() {
+    var banner = document.getElementById("nohuska-cookie-banner");
+    if (banner) banner.remove();
+  }
+
+  function setConsent(value) {
+    storeConsent(value);
+    removeConsentBanner();
+    if (value === "granted") loadAnalytics();
+    if (value === "denied") deleteAnalyticsCookies();
+  }
+
+  function showConsentBanner() {
+    if (document.getElementById("nohuska-cookie-banner")) return;
+
+    var banner = document.createElement("section");
+    banner.id = "nohuska-cookie-banner";
+    banner.className = "nohuska-cookie-banner";
+    banner.setAttribute("role", "dialog");
+    banner.setAttribute("aria-label", "Preferencias de cookies");
+    banner.innerHTML = [
+      '<div><strong>Tu privacidad importa</strong><p>Usamos Google Analytics para saber qué páginas ayudan a conseguir citas. Solo se activa si aceptas. Puedes cambiar tu elección cuando quieras.</p><a href="/cookies.html">Ver política de cookies</a></div>',
+      '<div class="nohuska-cookie-actions"><button type="button" data-cookie-choice="denied">Rechazar</button><button type="button" data-cookie-choice="granted">Aceptar</button></div>'
+    ].join("");
+    document.body.appendChild(banner);
+
+    banner.querySelectorAll("[data-cookie-choice]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        setConsent(button.dataset.cookieChoice);
+      });
+    });
+  }
+
+  function addConsentControls() {
+    var style = document.createElement("style");
+    style.textContent = [
+      ".nohuska-cookie-banner{position:fixed;z-index:10000;left:18px;right:18px;bottom:18px;max-width:820px;margin:auto;padding:20px;display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center;background:#102522;color:#fff;border:1px solid rgba(255,255,255,.22);box-shadow:0 18px 60px rgba(8,28,25,.32);font:400 14px/1.5 Arial,sans-serif}",
+      ".nohuska-cookie-banner strong{display:block;margin-bottom:4px;font-size:17px}.nohuska-cookie-banner p{margin:0 0 5px}.nohuska-cookie-banner a{color:#bce8e3;text-decoration:underline}.nohuska-cookie-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.nohuska-cookie-actions button{min-width:112px;min-height:44px;padding:0 16px;border:1px solid #fff;background:#f7f3ec;color:#102522;font-weight:700;cursor:pointer}.nohuska-cookie-actions button:last-child{background:#087b79;color:#fff;border-color:#087b79}",
+      ".nohuska-cookie-settings{position:fixed;z-index:89;left:10px;bottom:10px;padding:7px 10px;border:1px solid rgba(16,37,34,.35);border-radius:2px;background:#fffdf9;color:#102522;font:600 11px/1 Arial,sans-serif;cursor:pointer;box-shadow:0 6px 18px rgba(16,37,34,.12)}",
+      "@media(max-width:720px){.nohuska-cookie-banner{grid-template-columns:1fr;gap:14px;padding:17px;bottom:10px}.nohuska-cookie-actions button{min-width:0}.nohuska-cookie-settings{bottom:78px}}"
+    ].join("");
+    document.head.appendChild(style);
+
+    var settings = document.createElement("button");
+    settings.type = "button";
+    settings.className = "nohuska-cookie-settings";
+    settings.textContent = "Cookies";
+    settings.setAttribute("aria-label", "Cambiar preferencias de cookies");
+    settings.addEventListener("click", showConsentBanner);
+    document.body.appendChild(settings);
+
+    var reset = document.getElementById("nohuska-cookie-reset");
+    if (reset) reset.addEventListener("click", showConsentBanner);
+  }
+
+  addConsentControls();
+  if (getStoredConsent() === "granted") loadAnalytics();
+  if (!getStoredConsent()) showConsentBanner();
+
   var path = window.location.pathname.replace(/\/{2,}/g, "/").toLowerCase();
   var serviceRules = [
     ["micropigmentacion-labios", "labios"],
