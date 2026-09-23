@@ -63,17 +63,31 @@
   var reference = "WEB-" + service.toUpperCase() + "-" + locationName.toUpperCase() + "-" + source.toUpperCase();
 
   function trackLead(method, link, position) {
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "generate_lead",
-      lead_method: method,
-      lead_service: service,
-      lead_location: locationName,
-      lead_source: source,
-      lead_position: position,
+    var eventData = {
+      method: method,
+      service: service,
+      location: locationName,
+      source: source,
+      cta_position: link.dataset.ctaPosition || String(position),
       page_path: path,
       link_text: (link.textContent || "").trim().slice(0, 80)
+    };
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "nohuska_lead",
+      lead_method: eventData.method,
+      lead_service: eventData.service,
+      lead_location: eventData.location,
+      lead_source: eventData.source,
+      lead_position: eventData.cta_position,
+      page_path: eventData.page_path,
+      link_text: eventData.link_text
     });
+
+    if (typeof window.gtag === "function") {
+      window.gtag("event", "generate_lead", eventData);
+    }
   }
 
   document.querySelectorAll('a[href^="https://wa.me/34624011715"]').forEach(function (link, index) {
@@ -86,6 +100,7 @@
       }
       link.dataset.service = service;
       link.dataset.source = source;
+      if (!link.dataset.ctaPosition) link.dataset.ctaPosition = "whatsapp-" + (index + 1);
       link.addEventListener("click", function () {
         trackLead("whatsapp", link, index + 1);
       });
@@ -97,6 +112,7 @@
   document.querySelectorAll('a[href^="tel:"]').forEach(function (link, index) {
     link.dataset.service = service;
     link.dataset.source = source;
+    if (!link.dataset.ctaPosition) link.dataset.ctaPosition = "telefono-" + (index + 1);
     link.addEventListener("click", function () {
       trackLead("telefono", link, index + 1);
     });
