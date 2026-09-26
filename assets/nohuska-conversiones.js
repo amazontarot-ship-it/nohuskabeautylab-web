@@ -112,6 +112,7 @@
 
   var path = window.location.pathname.replace(/\/{2,}/g, "/").toLowerCase();
   var serviceRules = [
+    ["korean-gaze", "korean-gaze"],
     ["micropigmentacion-labios", "labios"],
     ["micropigmentacion-pecas", "pecas"],
     ["freckles", "pecas"],
