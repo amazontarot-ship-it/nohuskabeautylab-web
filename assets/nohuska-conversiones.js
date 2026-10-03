@@ -117,6 +117,7 @@
     ["micropigmentacion-labios", "labios"],
     ["micropigmentacion-pecas", "pecas"],
     ["freckles", "pecas"],
+    ["/pecas/", "pecas"],
     ["extensiones-pestanas", "extensiones-pestanas"],
     ["lifting-pestanas", "lifting-pestanas"],
     ["pestanas", "pestanas"],
