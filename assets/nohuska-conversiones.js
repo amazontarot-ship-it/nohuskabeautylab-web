@@ -169,10 +169,22 @@
     return source.replace(/[^a-z0-9-]/gi, "-").slice(0, 40);
   }
 
+  function getCampaign() {
+    var params = new URLSearchParams(window.location.search);
+    var current = params.get("utm_campaign");
+    var saved = window.sessionStorage.getItem("nohuska_campaign");
+    var campaign = current || saved || "sin-campana";
+
+    if (current) window.sessionStorage.setItem("nohuska_campaign", current);
+    return campaign.replace(/[^a-z0-9-]/gi, "-").slice(0, 60);
+  }
+
   var service = getService();
   var locationName = getLocation();
   var source = getSource();
+  var campaign = getCampaign();
   var reference = "WEB-" + service.toUpperCase() + "-" + locationName.toUpperCase() + "-" + source.toUpperCase();
+  if (campaign !== "sin-campana") reference += "-" + campaign.toUpperCase();
 
   function trackLead(method, link, position) {
     var eventData = {
@@ -180,6 +192,7 @@
       service: service,
       location: locationName,
       source: source,
+      campaign: campaign,
       cta_position: link.dataset.ctaPosition || String(position),
       page_path: path,
       link_text: (link.textContent || "").trim().slice(0, 80)
@@ -192,6 +205,7 @@
       lead_service: eventData.service,
       lead_location: eventData.location,
       lead_source: eventData.source,
+      lead_campaign: eventData.campaign,
       lead_position: eventData.cta_position,
       page_path: eventData.page_path,
       link_text: eventData.link_text
