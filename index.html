@@ -156,7 +156,7 @@
     .hero-conscious{max-width:610px;margin:18px 0 0;padding:15px 18px;border-left:2px solid var(--turquoise);background:rgba(18,170,169,.055);color:var(--muted);font-size:12px;line-height:1.65}
     .hero-conscious strong{color:var(--mineral)}
     .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px}
-    .hero-trust{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:26px;margin-top:44px;padding-top:22px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .hero-trust{display:grid;grid-template-columns:repeat(4,auto);justify-content:start;gap:26px;margin-top:44px;padding-top:22px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
     .hero-trust span,.hero-trust a{display:flex;align-items:center;gap:9px}
     .hero-trust a:hover{color:var(--turquoise)}
     .hero-trust i{width:17px;height:17px;display:grid;place-items:center;border-radius:50%;background:var(--turquoise-soft);color:var(--turquoise-ink);font-style:normal;font-size:10px}
@@ -579,12 +579,13 @@
           <div class="hero-trust">
             <span><i>✓</i> Valoración gratuita</span>
             <span><i>✓</i> Diseño personalizado</span>
+            <span><i>⌖</i> Avinguda Sant Esteve, 40</span>
             <a href="https://www.google.com/maps?cid=8487435919032865720" target="_blank" rel="noopener" aria-label="Ver Nohuska Beauty Lab en Google Maps"><i>★</i> Valoración 5,0 en Google</a>
           </div>
         </div>
         <div class="hero-visual reveal" aria-label="Proceso real de Nohuska Beauty Lab">
           <div class="hero-film">
-            <video class="always-loop" data-loop data-keep-alive src="assets/video-resultado-cejas-real.mp4" poster="assets/poster-video-principal.jpg" autoplay muted loop playsinline webkit-playsinline preload="metadata" aria-label="Proceso real de diseño de cejas en Nohuska Beauty Lab"><track kind="captions" srclang="es" label="Vídeo sin audio" src="assets/video-sin-audio.vtt"></video>
+            <video class="always-loop" data-loop data-delayed src="assets/video-resultado-cejas-real.mp4" poster="assets/poster-video-principal.jpg" muted loop playsinline webkit-playsinline preload="none" aria-label="Proceso real de diseño de cejas en Nohuska Beauty Lab"><track kind="captions" srclang="es" label="Vídeo sin audio" src="assets/video-sin-audio.vtt"></video>
             <div class="hero-film-label">
               <small>Proceso real · Nohuska</small>
               <strong>Precisión que se ve. Naturalidad que se siente.</strong>
@@ -706,7 +707,7 @@
         <div class="proof-grid">
           <article class="result-card reveal">
             <div class="result-image">
-              <img src="assets/resultado-cejas-antes-despues-real.jpg" alt="Antes y después real de diseño de cejas realizado por Nohuska Beauty Lab" width="1448" height="1086">
+              <img src="assets/resultado-cejas-antes-despues-real-960.jpg" alt="Antes y después real de diseño de cejas realizado por Nohuska Beauty Lab" width="960" height="720">
             </div>
             <div class="result-meta">
               <span class="result-num">01</span>
@@ -716,7 +717,7 @@
           </article>
           <article class="result-card reveal">
             <div class="result-image">
-              <img src="assets/resultado-cejas-madura-real.jpg" alt="Antes y después real de cejas en piel madura realizado por Nohuska Beauty Lab" width="1448" height="1086">
+              <img src="assets/resultado-cejas-madura-real-960.jpg" alt="Antes y después real de cejas en piel madura realizado por Nohuska Beauty Lab" width="960" height="720">
             </div>
             <div class="result-meta">
               <span class="result-num">02</span>
@@ -1202,7 +1203,7 @@
     }));
     document.querySelectorAll(".reveal").forEach(element=>element.classList.add("visible"));
     const loopVideos=[...document.querySelectorAll("video[data-loop]")];
-    const shouldBePlaying=video=>video.dataset.visible==="true"||video.hasAttribute("data-keep-alive");
+    const shouldBePlaying=video=>video.dataset.visible==="true"&&(!video.hasAttribute("data-delayed")||video.dataset.delayedReady==="true");
     const playVideo=(video,reset=false)=>{
       video.muted=true;
       video.loop=true;
@@ -1253,12 +1254,15 @@
     document.addEventListener("visibilitychange",resumeVisibleVideos);
     window.addEventListener("pageshow",resumeVisibleVideos);
     window.addEventListener("focus",resumeVisibleVideos);
-    window.setInterval(()=>{
-      const heroVideo=document.querySelector("video[data-keep-alive]");
-      if(heroVideo&&!document.hidden&&(heroVideo.paused||heroVideo.ended||heroVideo.readyState<2)){
-        playVideo(heroVideo,heroVideo.ended);
-      }
-    },1200);
+    const activateDelayedVideos=()=>{
+      loopVideos.filter(video=>video.hasAttribute("data-delayed")).forEach(video=>{
+        video.dataset.delayedReady="true";
+        if(!document.hidden&&video.dataset.visible==="true") playVideo(video);
+      });
+    };
+    ["pointerdown","touchstart","keydown","scroll"].forEach(eventName=>{
+      window.addEventListener(eventName,activateDelayedVideos,{once:true,passive:true});
+    });
   </script>
   <script src="assets/nohuska-conversiones.js?v=20261005a" defer></script>
 </body>
