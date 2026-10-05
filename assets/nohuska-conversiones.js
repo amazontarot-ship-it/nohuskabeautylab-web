@@ -183,13 +183,16 @@
   var locationName = getLocation();
   var source = getSource();
   var campaign = getCampaign();
-  var reference = "WEB-" + service.toUpperCase() + "-" + locationName.toUpperCase() + "-" + source.toUpperCase();
-  if (campaign !== "sin-campana") reference += "-" + campaign.toUpperCase();
+  function buildReference(serviceName) {
+    var result = "WEB-" + serviceName.toUpperCase() + "-" + locationName.toUpperCase() + "-" + source.toUpperCase();
+    if (campaign !== "sin-campana") result += "-" + campaign.toUpperCase();
+    return result;
+  }
 
   function trackLead(method, link, position) {
     var eventData = {
       method: method,
-      service: service,
+      service: link.dataset.service || service,
       location: locationName,
       source: source,
       campaign: campaign,
@@ -220,11 +223,12 @@
     try {
       var url = new URL(link.href);
       var message = url.searchParams.get("text") || "Hola Nohuska, quiero información.";
+      var linkService = link.dataset.service || service;
       if (message.indexOf("Referencia: WEB-") === -1) {
-        url.searchParams.set("text", message + "\n\nReferencia: " + reference);
+        url.searchParams.set("text", message + "\n\nReferencia: " + buildReference(linkService));
         link.href = url.toString();
       }
-      link.dataset.service = service;
+      link.dataset.service = linkService;
       link.dataset.source = source;
       if (!link.dataset.ctaPosition) link.dataset.ctaPosition = "whatsapp-" + (index + 1);
       link.addEventListener("click", function () {

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#102522">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <title>Micropigmentación y Pestañas en Granollers | Nohuska</title>
-  <meta name="description" content="Micropigmentación, cejas y pestañas en Granollers: labios, freckles, Powder Brows, lifting y extensiones. Valoración gratuita con Valentina.">
+  <meta name="description" content="Micropigmentación, cejas, lifting y pestañas en Granollers. Resultados reales, valoración gratuita y cita por WhatsApp en Nohuska Beauty Lab.">
   <link rel="canonical" href="https://nohuska.com/">
   <meta property="og:title" content="Nohuska · Micropigmentación y Pestañas en Granollers">
   <meta property="og:description" content="Micropigmentación, cejas, pestañas y freckles con diseño personalizado y valoración gratuita en Granollers.">
@@ -180,6 +180,18 @@
     .promise-lead{font:400 23px "Playfair Display",serif}
     .promise-item{height:100%;display:flex;align-items:center;padding-left:28px;border-left:1px solid rgba(255,255,255,.13);font:600 10px "Manrope",sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#c6d7d3}
     .promise-item b{margin-right:12px;color:var(--champagne);font:400 24px "Playfair Display",serif}
+
+    .quick-booking{padding:42px 0;background:var(--ivory);border-bottom:1px solid var(--line)}
+    .quick-booking-head{display:flex;justify-content:space-between;gap:32px;align-items:end;margin-bottom:20px}
+    .quick-booking-head h2{margin:6px 0 0;font:400 clamp(30px,3.5vw,48px)/1.05 "Playfair Display",serif}
+    .quick-booking-head p{max-width:460px;margin:0;color:var(--muted);font-size:13px;line-height:1.65}
+    .quick-booking-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .quick-booking-card{min-height:118px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--line);background:var(--paper);transition:.2s}
+    .quick-booking-card:hover{transform:translateY(-2px);border-color:var(--turquoise);box-shadow:0 14px 32px rgba(16,37,34,.08)}
+    .quick-booking-card small{color:var(--turquoise-ink);font:700 8px/1 "Manrope",sans-serif;letter-spacing:.14em;text-transform:uppercase}
+    .quick-booking-card strong{display:flex;justify-content:space-between;gap:12px;align-items:end;font:400 20px/1.12 "Playfair Display",serif}
+    .quick-booking-card strong span{color:var(--turquoise);font-family:"DM Sans",sans-serif}
+    .quick-booking-note{margin:16px 0 0;color:var(--muted);font-size:11px;text-align:center}
 
     .section{padding:108px 0}
     .section-head{display:grid;grid-template-columns:.72fr 1.28fr;gap:64px;align-items:end;margin-bottom:48px}
@@ -410,6 +422,7 @@
       .hero h1,.hero-lead{margin-left:auto;margin-right:auto}
       .hero-actions,.hero-trust{justify-content:center}
       .hero-visual{height:680px;min-height:0;width:min(100%,620px);margin:auto}
+      .quick-booking-grid{grid-template-columns:1fr 1fr}
       .promise-grid{grid-template-columns:1fr 1fr}
       .promise-lead{grid-column:1/-1;padding:28px 0;border-bottom:1px solid rgba(255,255,255,.13)}
       .promise-item{padding:24px 0;border-left:0}
@@ -452,6 +465,11 @@
       .hero-visual{height:560px;grid-template-columns:1fr}
       .hero-detail{display:none}
       .hero-film video{object-position:center}
+      .quick-booking{padding:34px 0}
+      .quick-booking-head{display:block;text-align:center}
+      .quick-booking-head p{margin:12px auto 0}
+      .quick-booking-grid{grid-template-columns:1fr}
+      .quick-booking-card{min-height:92px}
       .promise-grid{display:block;padding:24px 0}
       .promise-lead{padding:0 0 20px}
       .promise-item,.promise-item:nth-child(3){border:0;border-top:1px solid rgba(255,255,255,.12);padding:17px 0}
@@ -556,7 +574,7 @@
           <p class="hero-conscious"><strong>Belleza consciente.</strong> Trabajamos con una selección de productos veganos y cosmética coreana. Cada mes destinamos el 5% de nuestros beneficios a una causa animal.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#referencias">Ver resultados reales</a>
-            <a class="button button-outline" data-cta-position="portada" href="https://wa.me/34624011715?text=Hola%20Nohuska%2C%20quiero%20una%20valoraci%C3%B3n%20gratuita.%20Me%20interesa%3A" target="_blank" rel="noopener">Reservar valoración</a>
+            <a class="button button-outline" data-cta-position="portada" href="https://wa.me/34624011715?text=Hola%20Nohuska%2C%20quiero%20consultar%20los%20pr%C3%B3ximos%20huecos.%20Me%20interesa%3A" target="_blank" rel="noopener">Consultar próximos huecos</a>
           </div>
           <div class="hero-trust">
             <span><i>✓</i> Valoración gratuita</span>
@@ -589,6 +607,22 @@
         <div class="promise-item"><b>01</b> Rostros, no plantillas</div>
         <div class="promise-item"><b>02</b> Técnica y criterio</div>
         <div class="promise-item"><b>03</b> Belleza reconocible</div>
+      </div>
+    </section>
+
+    <section class="quick-booking" aria-labelledby="quick-booking-title">
+      <div class="wrap">
+        <div class="quick-booking-head">
+          <div><p class="eyebrow">Reserva directa</p><h2 id="quick-booking-title">¿Qué quieres mejorar?</h2></div>
+          <p>Elige el tratamiento y te orientamos por WhatsApp antes de reservar. Valoración gratuita y atención con cita previa en Granollers.</p>
+        </div>
+        <div class="quick-booking-grid">
+          <a class="quick-booking-card" data-service="cejas" data-cta-position="acceso-rapido-cejas" href="https://wa.me/34624011715?text=Hola%20Nohuska%2C%20quiero%20orientaci%C3%B3n%20y%20consultar%20los%20pr%C3%B3ximos%20huecos%20para%20mis%20cejas%20en%20Granollers" target="_blank" rel="noopener"><small>Diseño personalizado</small><strong>Cejas y Natural Brow <span>→</span></strong></a>
+          <a class="quick-booking-card" data-service="lifting-pestanas" data-cta-position="acceso-rapido-lifting" href="https://wa.me/34624011715?text=Hola%20Nohuska%2C%20quiero%20consultar%20los%20pr%C3%B3ximos%20huecos%20para%20lifting%20coreano%20con%20tinte%20en%20Granollers" target="_blank" rel="noopener"><small>Pestaña natural</small><strong>Lifting coreano + tinte <span>→</span></strong></a>
+          <a class="quick-booking-card" data-service="limpieza-facial" data-cta-position="acceso-rapido-facial" href="https://wa.me/34624011715?text=Hola%20Nohuska%2C%20quiero%20consultar%20los%20pr%C3%B3ximos%20huecos%20para%20una%20limpieza%20facial%20en%20Granollers" target="_blank" rel="noopener"><small>K-Beauty vegana</small><strong>Limpieza facial <span>→</span></strong></a>
+          <a class="quick-booking-card" data-service="micropigmentacion-capilar" data-cta-position="acceso-rapido-capilar" href="https://wa.me/34624011715?text=Hola%20Nohuska%2C%20quiero%20una%20valoraci%C3%B3n%20de%20micropigmentaci%C3%B3n%20capilar%20en%20Granollers" target="_blank" rel="noopener"><small>Densidad y entradas</small><strong>Micropigmentación capilar <span>→</span></strong></a>
+        </div>
+        <p class="quick-booking-note">También puedes llamar al <a href="tel:+34624011715" data-cta-position="acceso-rapido-telefono"><strong>624 011 715</strong></a>.</p>
       </div>
     </section>
 
