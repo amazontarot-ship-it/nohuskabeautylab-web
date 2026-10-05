@@ -247,4 +247,34 @@
       trackLead("telefono", link, index + 1);
     });
   });
+
+  document.querySelectorAll('a[href*="google.com/maps"], a[href*="maps.google.com"], a[href*="maps.app.goo.gl"]').forEach(function (link, index) {
+    link.addEventListener("click", function () {
+      var eventData = {
+        service: link.dataset.service || service,
+        location: locationName,
+        source: source,
+        campaign: campaign,
+        cta_position: link.dataset.ctaPosition || "mapa-" + (index + 1),
+        page_path: path,
+        link_text: (link.textContent || link.getAttribute("aria-label") || "Google Maps").trim().slice(0, 80)
+      };
+
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "nohuska_map_click",
+        lead_service: eventData.service,
+        lead_location: eventData.location,
+        lead_source: eventData.source,
+        lead_campaign: eventData.campaign,
+        lead_position: eventData.cta_position,
+        page_path: eventData.page_path,
+        link_text: eventData.link_text
+      });
+
+      if (typeof window.gtag === "function") {
+        window.gtag("event", "maps_click", eventData);
+      }
+    });
+  });
 })();
