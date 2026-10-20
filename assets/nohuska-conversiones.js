@@ -219,6 +219,31 @@
     }
   }
 
+  function trackContactClick(eventName, method, link, position) {
+    var eventData = {
+      method: method,
+      service: link.dataset.service || service,
+      location: locationName,
+      source: source,
+      campaign: campaign,
+      cta_position: link.dataset.ctaPosition || String(position),
+      page_path: path,
+      link_text: (link.textContent || "").trim().slice(0, 80)
+    };
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: eventName,
+      contact_method: method,
+      contact_service: eventData.service,
+      contact_location: eventData.location,
+      contact_source: eventData.source,
+      contact_campaign: eventData.campaign,
+      contact_position: eventData.cta_position,
+      page_path: eventData.page_path
+    });
+    if (typeof window.gtag === "function") window.gtag("event", eventName, eventData);
+  }
+
   document.querySelectorAll('a[href^="https://wa.me/34624011715"]').forEach(function (link, index) {
     try {
       var url = new URL(link.href);
@@ -237,6 +262,18 @@
     } catch (error) {
       // El enlace original continúa funcionando si el navegador no admite URL.
     }
+  });
+
+  document.querySelectorAll('a[href^="tel:"]').forEach(function (link, index) {
+    link.addEventListener("click", function () {
+      trackContactClick("click_call", "call", link, index + 1);
+    });
+  });
+
+  document.querySelectorAll('a[href*="booksy.com"]').forEach(function (link, index) {
+    link.addEventListener("click", function () {
+      trackContactClick("click_booksy", "booksy", link, index + 1);
+    });
   });
 
   document.querySelectorAll('a[href^="tel:"]').forEach(function (link, index) {
