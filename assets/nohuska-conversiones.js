@@ -280,9 +280,6 @@
     link.dataset.service = service;
     link.dataset.source = source;
     if (!link.dataset.ctaPosition) link.dataset.ctaPosition = "telefono-" + (index + 1);
-    link.addEventListener("click", function () {
-      trackLead("telefono", link, index + 1);
-    });
   });
 
   document.querySelectorAll('a[href*="google.com/maps"], a[href*="maps.google.com"], a[href*="maps.app.goo.gl"]').forEach(function (link, index) {
