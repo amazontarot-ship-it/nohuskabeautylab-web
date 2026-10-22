@@ -422,9 +422,10 @@
       .navlinks.open{display:flex}
       .navlinks .button{min-height:56px}
       .menu-btn{display:block}
-      .hero-grid{grid-template-columns:1fr;gap:42px;padding:70px 0}
+      .hero-grid{grid-template-columns:minmax(0,1fr);gap:42px;padding:70px 0}
       .hero{min-height:auto}
       .hero-grid{min-height:auto}
+      .hero-grid>*,.hero-copy,.hero-visual{min-width:0}
       .hero-copy{text-align:center}
       .hero h1,.hero-lead{margin-left:auto;margin-right:auto}
       .hero-actions,.hero-trust{justify-content:center}
@@ -463,10 +464,11 @@
       .wordmark strong{font-size:26px}
       .wordmark small{font-size:7px}
       .hero-grid{padding:50px 0 44px}
-      .hero h1{font-size:clamp(49px,15.5vw,72px)}
+      .hero h1{font-size:clamp(30px,9.5vw,44px);overflow-wrap:anywhere}
+      .hero .eyebrow,.hero-lead,.hero-conscious{overflow-wrap:anywhere}
       .hero-lead{font-size:15px;line-height:1.7}
       .hero-conscious{text-align:left;font-size:11px}
-      .hero-actions{display:grid}
+      .hero-actions{display:grid;grid-template-columns:minmax(0,1fr);margin-top:24px}
       .button{width:100%}
       .hero-trust{grid-template-columns:1fr;gap:10px;text-align:left}
       .hero-visual{height:560px;grid-template-columns:1fr}
@@ -483,7 +485,8 @@
       .promise-lead{padding:0 0 20px}
       .promise-item,.promise-item:nth-child(3){border:0;border-top:1px solid rgba(255,255,255,.12);padding:17px 0}
       .promise-item:last-child{display:flex}
-      .star-grid,.star-secondary{grid-template-columns:1fr}
+      .star-grid,.star-secondary{grid-template-columns:minmax(0,1fr)}
+      .star-card,.star-mini,.star-content,.star-mini-content{min-width:0;overflow-wrap:anywhere}
       .star-card{min-height:0;grid-template-rows:520px auto}
       .star-content{grid-template-columns:1fr auto;padding:24px 20px 26px}
       .star-content h3{font-size:30px}
@@ -580,11 +583,11 @@
           <p class="eyebrow">Micropigmentación, cejas y pestañas · Granollers</p>
           <h1 class="serif">Micropigmentación, cejas y pestañas <em>en Granollers.</em></h1>
           <p class="hero-lead"><strong>Tu rostro no necesita cambiar. Necesita el diseño correcto.</strong> Micropigmentación y belleza natural para que te mires y sigas reconociéndote.</p>
-          <p class="hero-conscious"><strong>Belleza consciente.</strong> Trabajamos con una selección de productos veganos y cosmética coreana. Cada mes destinamos el 5% de nuestros beneficios a una causa animal.</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="resultados.html">Ver resultados reales</a>
-            <a class="button button-outline" data-cta-position="portada" href="https://wa.me/34624011715?text=Hola%20Nohuska%2C%20quiero%20consultar%20los%20pr%C3%B3ximos%20huecos.%20Me%20interesa%3A" target="_blank" rel="noopener">Consultar próximos huecos</a>
+            <a class="button button-primary" data-cta-position="portada" href="https://wa.me/34624011715?text=Hola%20Nohuska%2C%20quiero%20una%20valoraci%C3%B3n%20gratuita%20de%20cejas%20o%20pesta%C3%B1as.%20Me%20interesa%3A" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+            <a class="button button-outline" href="resultados.html">Ver resultados reales</a>
           </div>
+          <p class="hero-conscious"><strong>Belleza consciente.</strong> Trabajamos con una selección de productos veganos y cosmética coreana. Cada mes destinamos el 5% de nuestros beneficios a una causa animal.</p>
           <div class="hero-trust">
             <span><i>✓</i> Valoración gratuita</span>
             <span><i>✓</i> Diseño personalizado</span>
@@ -995,8 +998,8 @@
       <div class="wrap">
         <div class="section-head">
           <div><p class="eyebrow">Guías para elegir</p><h2 class="serif" id="seo-paths-title">Encuentra tu tratamiento y tu zona.</h2></div>
-          <p>La lista anterior mantiene sus descripciones sin redirecciones. Estas guías independientes explican con detalle cada especialidad, la curación, los cuidados, la ubicación real y las opciones para Granollers, Vallès Oriental y Barcelona.</p>
-          <p class="notice">El estudio está en Granollers. También recibimos consultas de Canovelles, Les Franqueses, Cardedeu, La Garriga, Llinars, La Roca, Lliçà de Vall, Mollet, Mataró y Argentona cuando puedes desplazarte. No tenemos sedes ficticias: el diagnóstico y todos los tratamientos se realizan en Avinguda Sant Esteve, 40.</p>
+          <p>Consulta qué incluye cada tratamiento, sus cuidados, límites y opciones de valoración antes de elegir. Puedes empezar por los <a href="resultados.html">casos reales de Nohuska</a> o ir directamente a la especialidad que te interesa.</p>
+          <p class="notice">El estudio está en Avinguda Sant Esteve, 40, Granollers. Atendemos también a personas de Canovelles, Les Franqueses, Cardedeu, La Garriga, Llinars, La Roca, Lliçà de Vall, Mollet, Mataró y Argentona que se desplazan al centro. Para pecas o capilar, puedes solicitar orientación antes de venir desde Barcelona u otra localidad.</p>
         </div>
         <div class="seo-paths-grid">
           <a class="seo-path" href="pecas/index.html"><small>The Freckles Hub · prioridad</small><h3>Guía completa de pecas</h3><p>Opciones temporales y semipermanentes, diseño, casos reales, curación y valoración.</p><strong>Explorar el centro de freckles →</strong></a>
@@ -1290,7 +1293,7 @@
       window.addEventListener(eventName,activateDelayedVideos,{once:true,passive:true});
     });
   </script>
-  <script src="assets/nohuska-conversiones.js?v=20261005b" defer></script>
+  <script src="assets/nohuska-conversiones.js?v=20261022c" defer></script>
 </body>
 </html>
 

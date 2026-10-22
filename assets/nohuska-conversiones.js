@@ -1,8 +1,16 @@
 (function () {
   "use strict";
 
+  if (window.nohuskaContactTrackingInitialized) return;
+  window.nohuskaContactTrackingInitialized = true;
+
   var analyticsId = "G-EV7CGL8W75";
   var consentKey = "nohuska_analytics_consent";
+  var analyticsConsent = getStoredConsent();
+  var allowedSources = ["google", "instagram", "facebook", "booksy", "chatgpt", "bing", "whatsapp", "newsletter", "internal-test"];
+  var allowedMediums = ["organic", "referral", "social", "email", "cpc", "paid-social", "qa"];
+  // Solo códigos públicos revisados: nunca nombres, teléfonos o texto libre.
+  var allowedCampaigns = ["perfil_empresa_granollers", "reserva_perfil_empresa", "gbp_micropigmentacion_cejas_oct2026", "gbp_korean_gaze_oct2026", "christmas_glow_2026", "whatsapp-qa-20261022"];
 
   function getStoredConsent() {
     try {
@@ -21,6 +29,7 @@
   }
 
   function loadAnalytics() {
+    if (analyticsConsent !== "granted") return;
     if (window.nohuskaAnalyticsLoaded) return;
     if (!["nohuska.com", "www.nohuska.com"].includes(window.location.hostname)) return;
 
@@ -29,11 +38,31 @@
     window.gtag = window.gtag || function () {
       window.dataLayer.push(arguments);
     };
-    window.gtag("js", new Date());
-    window.gtag("config", analyticsId, {
-      allow_google_signals: false,
-      allow_ad_personalization_signals: false
+    window.gtag("consent", "default", {
+      analytics_storage: "granted",
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied"
     });
+    window.gtag("js", new Date());
+    var analyticsConfig = {
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+      // No enviar parámetros de la URL ni rutas completas de referencia.
+      page_location: window.location.origin + window.location.pathname,
+      page_referrer: getReferrerOrigin()
+    };
+    var params = new URLSearchParams(window.location.search);
+    var campaignSource = (params.get("utm_source") || "").toLowerCase();
+    var campaignMedium = (params.get("utm_medium") || "").toLowerCase();
+    // Conservar atribución GA4 de las campañas públicas aunque se suprima la query.
+    if (campaignSource) {
+      analyticsConfig.campaign_source = allowedSources.indexOf(campaignSource) !== -1 ? campaignSource : "campana-otra";
+      if (campaignMedium) analyticsConfig.campaign_medium = allowedMediums.indexOf(campaignMedium) !== -1 ? campaignMedium : "otro";
+    }
+    if (params.get("utm_campaign")) analyticsConfig.campaign_name = campaign;
+    if (isContactQa()) analyticsConfig.debug_mode = true;
+    window.gtag("config", analyticsId, analyticsConfig);
 
     var script = document.createElement("script");
     script.async = true;
@@ -57,10 +86,21 @@
   }
 
   function setConsent(value) {
+    analyticsConsent = value;
     storeConsent(value);
     removeConsentBanner();
-    if (value === "granted") loadAnalytics();
-    if (value === "denied") deleteAnalyticsCookies();
+    window["ga-disable-" + analyticsId] = value !== "granted";
+    if (typeof window.gtag === "function") {
+      window.gtag("consent", "update", { analytics_storage: value });
+    }
+    if (value === "granted") {
+      saveAttribution();
+      loadAnalytics();
+    }
+    if (value === "denied") {
+      clearAttribution();
+      deleteAnalyticsCookies();
+    }
   }
 
   function showConsentBanner() {
@@ -106,10 +146,6 @@
     if (reset) reset.addEventListener("click", showConsentBanner);
   }
 
-  addConsentControls();
-  if (getStoredConsent() === "granted") loadAnalytics();
-  if (!getStoredConsent()) showConsentBanner();
-
   var path = window.location.pathname.replace(/\/{2,}/g, "/").toLowerCase();
   var serviceRules = [
     ["henna-lips", "henna-lips"],
@@ -149,81 +185,109 @@
     return "granollers";
   }
 
+  function getSessionValue(key) {
+    if (analyticsConsent !== "granted") return null;
+    try {
+      return window.sessionStorage.getItem(key);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function setSessionValue(key, value) {
+    if (analyticsConsent !== "granted") return;
+    try {
+      window.sessionStorage.setItem(key, value);
+    } catch (error) {
+      // El contacto y la elección de cookies funcionan sin almacenamiento.
+    }
+  }
+
+  function clearAttribution() {
+    try {
+      window.sessionStorage.removeItem("nohuska_source");
+      window.sessionStorage.removeItem("nohuska_campaign");
+    } catch (error) {
+      // Algunos navegadores bloquean sessionStorage por completo.
+    }
+  }
+
+  function saveAttribution() {
+    if (source) setSessionValue("nohuska_source", source);
+    if (campaign) setSessionValue("nohuska_campaign", campaign);
+  }
+
+  function getReferrerOrigin() {
+    try {
+      return document.referrer ? new URL(document.referrer).origin : "";
+    } catch (error) {
+      return "";
+    }
+  }
+
   function getSource() {
     var params = new URLSearchParams(window.location.search);
-    var campaignSource = params.get("utm_source");
-    var campaignMedium = params.get("utm_medium");
-    var saved = window.sessionStorage.getItem("nohuska_source");
-    var referrer = document.referrer.toLowerCase();
-    var source = "web-directa";
+    var campaignSource = (params.get("utm_source") || "").toLowerCase();
+    var campaignMedium = (params.get("utm_medium") || "").toLowerCase();
+    var saved = getSessionValue("nohuska_source");
+    var referrerHost = "";
+    try {
+      referrerHost = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : "";
+    } catch (error) {
+      // Un referente inválido no interrumpe los enlaces de contacto.
+    }
+    var source = "directo-o-desconocido";
 
     if (campaignSource) {
-      source = campaignSource + (campaignMedium ? "-" + campaignMedium : "");
-    } else if (saved) {
+      source = allowedSources.indexOf(campaignSource) !== -1 ? campaignSource : "campana-otra";
+      if (allowedMediums.indexOf(campaignMedium) !== -1) source += "-" + campaignMedium;
+    } else if (saved && (/^(google|instagram|facebook|booksy|chatgpt|bing|whatsapp|newsletter|internal-test|campana-otra)(-(organic|referral|social|email|cpc|paid-social|organico|qa))?$/.test(saved) || saved === "referencia-web" || saved === "directo-o-desconocido")) {
       source = saved;
-    } else if (referrer.indexOf("google.") !== -1) {
+    } else if (/(^|\.)google\.(com|es|cat|fr|de|it|pt|co\.uk)$/.test(referrerHost)) {
       source = "google-organico";
-    } else if (referrer.indexOf("instagram.com") !== -1) {
+    } else if (/(^|\.)instagram\.com$/.test(referrerHost)) {
       source = "instagram";
-    } else if (referrer) {
+    } else if (/(^|\.)chatgpt\.com$/.test(referrerHost)) {
+      source = "chatgpt";
+    } else if (referrerHost && referrerHost !== window.location.hostname && !/^(www\.)?(nohuska\.com|nohuskabeautylab\.com)$/.test(referrerHost)) {
       source = "referencia-web";
     }
 
-    window.sessionStorage.setItem("nohuska_source", source);
-    return source.replace(/[^a-z0-9-]/gi, "-").slice(0, 40);
+    setSessionValue("nohuska_source", source);
+    return source;
   }
 
   function getCampaign() {
     var params = new URLSearchParams(window.location.search);
     var current = params.get("utm_campaign");
-    var saved = window.sessionStorage.getItem("nohuska_campaign");
-    var campaign = current || saved || "sin-campana";
+    var saved = getSessionValue("nohuska_campaign");
+    var candidate = current || saved;
+    var campaign = candidate ? (allowedCampaigns.indexOf(candidate) !== -1 ? candidate : "campana-otra") : "sin-campana";
 
-    if (current) window.sessionStorage.setItem("nohuska_campaign", current);
-    return campaign.replace(/[^a-z0-9-]/gi, "-").slice(0, 60);
+    if (current) setSessionValue("nohuska_campaign", campaign);
+    return campaign;
   }
 
   var service = getService();
   var locationName = getLocation();
   var source = getSource();
   var campaign = getCampaign();
+  addConsentControls();
+  if (analyticsConsent === "granted") loadAnalytics();
+  if (!analyticsConsent) showConsentBanner();
+
+  function isContactQa() {
+    return source === "internal-test-qa" && campaign === "whatsapp-qa-20261022";
+  }
+
   function buildReference(serviceName) {
     var result = "WEB-" + serviceName.toUpperCase() + "-" + locationName.toUpperCase() + "-" + source.toUpperCase();
     if (campaign !== "sin-campana") result += "-" + campaign.toUpperCase();
     return result;
   }
 
-  function trackLead(method, link, position) {
-    var eventData = {
-      method: method,
-      service: link.dataset.service || service,
-      location: locationName,
-      source: source,
-      campaign: campaign,
-      cta_position: link.dataset.ctaPosition || String(position),
-      page_path: path,
-      link_text: (link.textContent || "").trim().slice(0, 80)
-    };
-
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "nohuska_lead",
-      lead_method: eventData.method,
-      lead_service: eventData.service,
-      lead_location: eventData.location,
-      lead_source: eventData.source,
-      lead_campaign: eventData.campaign,
-      lead_position: eventData.cta_position,
-      page_path: eventData.page_path,
-      link_text: eventData.link_text
-    });
-
-    if (typeof window.gtag === "function") {
-      window.gtag("event", "generate_lead", eventData);
-    }
-  }
-
   function trackContactClick(eventName, method, link, position) {
+    if (analyticsConsent !== "granted" || typeof window.gtag !== "function") return;
     var eventData = {
       method: method,
       service: link.dataset.service || service,
@@ -231,21 +295,14 @@
       source: source,
       campaign: campaign,
       cta_position: link.dataset.ctaPosition || String(position),
-      page_path: path,
-      link_text: (link.textContent || "").trim().slice(0, 80)
+      page_path: path
     };
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: eventName,
-      contact_method: method,
-      contact_service: eventData.service,
-      contact_location: eventData.location,
-      contact_source: eventData.source,
-      contact_campaign: eventData.campaign,
-      contact_position: eventData.cta_position,
-      page_path: eventData.page_path
-    });
-    if (typeof window.gtag === "function") window.gtag("event", eventName, eventData);
+    if (isContactQa()) {
+      eventData.debug_mode = true;
+      eventData.test_event = true;
+    }
+    // Una única emisión por clic. No acredita conversación, lead ni reserva.
+    window.gtag("event", eventName, eventData);
   }
 
   document.querySelectorAll('a[href^="https://wa.me/34624011715"]').forEach(function (link, index) {
@@ -261,7 +318,7 @@
       link.dataset.source = source;
       if (!link.dataset.ctaPosition) link.dataset.ctaPosition = "whatsapp-" + (index + 1);
       link.addEventListener("click", function () {
-        trackLead("whatsapp", link, index + 1);
+        trackContactClick("click_whatsapp", "whatsapp", link, index + 1);
       });
     } catch (error) {
       // El enlace original continúa funcionando si el navegador no admite URL.
@@ -288,31 +345,16 @@
 
   document.querySelectorAll('a[href*="google.com/maps"], a[href*="maps.google.com"], a[href*="maps.app.goo.gl"]').forEach(function (link, index) {
     link.addEventListener("click", function () {
+      if (analyticsConsent !== "granted" || typeof window.gtag !== "function") return;
       var eventData = {
         service: link.dataset.service || service,
         location: locationName,
         source: source,
         campaign: campaign,
         cta_position: link.dataset.ctaPosition || "mapa-" + (index + 1),
-        page_path: path,
-        link_text: (link.textContent || link.getAttribute("aria-label") || "Google Maps").trim().slice(0, 80)
+        page_path: path
       };
-
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: "nohuska_map_click",
-        lead_service: eventData.service,
-        lead_location: eventData.location,
-        lead_source: eventData.source,
-        lead_campaign: eventData.campaign,
-        lead_position: eventData.cta_position,
-        page_path: eventData.page_path,
-        link_text: eventData.link_text
-      });
-
-      if (typeof window.gtag === "function") {
-        window.gtag("event", "maps_click", eventData);
-      }
+      window.gtag("event", "maps_click", eventData);
     });
   });
 })();
