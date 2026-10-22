@@ -112,6 +112,10 @@
 
   var path = window.location.pathname.replace(/\/{2,}/g, "/").toLowerCase();
   var serviceRules = [
+    ["henna-lips", "henna-lips"],
+    ["ritual-nohuska-masaje", "ritual-nohuska"],
+    ["ritual-nohuska", "ritual-nohuska"],
+    ["masaje", "ritual-nohuska"],
     ["korean-gaze", "korean-gaze"],
     ["micropigmentacion-cejas", "micropigmentacion-cejas"],
     ["micropigmentacion-labios", "labios"],
