@@ -17,6 +17,7 @@ Base: `fbdafd1`. Respaldo: rama `backup/whatsapp-recovery-20261022` en esa revis
 | Pecas Barcelona | Enumeración de búsquedas y bloques repetidos. | Comparación de técnicas, orientación antes de desplazarse y acceso al caso `#pecas`. | Ubicación real Granollers; sin resultado curado inventado. |
 | Capilar | Metatexto sobre landing e intención local; instrucciones duplicadas. | Acceso al caso `#capilar`, guía útil y contenido más compacto; 1.535 → 1.411 palabras. | Se conservan video, límites, proceso y FAQ. |
 | Results Lab | Casos sin anclas, figuras inválidas, consulta genérica. | Anclas por caso, figuras y ItemList coherentes, consulta por tratamiento, fotografía completa y márgenes móviles. | Casos existentes, sin nuevos testimonios, fechas de evolución ni resultados añadidos. |
+| Reserva Booksy | HTTP 200 se había interpretado como funcionamiento correcto. La prueba interactiva muestra «Este negocio ya no está disponible». | Se sustituyen los cuatro botones de Booksy en portada, cejas, lifting y Natural Brow por llamada, conservando WhatsApp. Se retira esa ficha no disponible del `sameAs` en tres páginas. | La búsqueda oficial no encontró una ficha alternativa activa. No se afirma que este fallo comenzara el 18/10. |
 
 La actualización de la versión del script en 41 HTML es mecánica para renovar la caché. No equivale a optimizar semánticamente 41 páginas.
 
@@ -42,5 +43,6 @@ Para revertir, preparar un `git revert` de los commits de esta intervención des
 
 - Confirmar origen de conversaciones antiguas mediante WhatsApp Business y métricas diarias del Perfil de Empresa. Los clics de Search Console no incluyen todos los contactos directos de Maps.
 - Mantener el Perfil de Empresa configurado; no hay una categoría nueva justificada en esta intervención.
+- En el Perfil de Empresa queda pendiente sustituir el enlace externo de servicios/menú de Booksy, que actualmente no ofrece la ficha. No se ha modificado la cuenta de Booksy ni el Perfil de Empresa.
 - Reporte de asociación incorrecta de ChatGPT preparado en `outputs/reporte-identidad-chatgpt-nohuska.md`; no enviado.
 - Precios y duración no confirmados continúan sujetos a consulta. No se publican cifras inventadas.
