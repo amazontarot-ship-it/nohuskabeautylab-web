@@ -19,6 +19,11 @@ jobs:
       - name: Revisar la web
         uses: actions/checkout@v5
 
+      - name: Proteger identidad y enlaces de contacto
+        run: |
+          node scripts/test_business_identity.cjs
+          node scripts/test_contact_tracking.cjs
+
       - name: Ejecutar auditoría SEO
         id: audit
         continue-on-error: true
