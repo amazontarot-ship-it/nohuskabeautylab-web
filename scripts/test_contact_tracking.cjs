@@ -36,7 +36,9 @@ function createPage(options = {}) {
     }
   }
   const wa = new Element("a", "https://wa.me/34624011715?text=" + encodeURIComponent(options.message || "Hola, quiero información de lifting."));
+  if (options.waService) wa.dataset.service = options.waService;
   const phone = new Element("a", "tel:+34624011715");
+  if (options.phoneService) phone.dataset.service = options.phoneService;
   const booksy = new Element("a", "https://booksy.com/es-es/192632_nohuska-beauty-lab");
   const maps = new Element("a", "https://www.google.com/maps/place/Nohuska");
   const storage = (initial, blocked) => {
@@ -154,6 +156,21 @@ assert.equal(continued.events()[0][2].campaign, "perfil_empresa_granollers");
 const internalUnknown = createPage({ consent: "granted", referrer: "https://nohuska.com/" });
 internalUnknown.wa.click();
 assert.equal(internalUnknown.events()[0][2].source, "directo-o-desconocido");
+const newCampaign = createPage({
+  consent: "granted", url: "https://nohuska.com/?utm_source=instagram&utm_medium=social",
+  session: { nohuska_source: "google-organic", nohuska_campaign: "perfil_empresa_granollers" }
+});
+newCampaign.wa.click();
+assert.equal(newCampaign.events()[0][2].source, "instagram-social");
+assert.equal(newCampaign.events()[0][2].campaign, "sin-campana");
+assert.equal(newCampaign.window.sessionStorage.values.nohuska_campaign, "sin-campana");
+assert.doesNotMatch(new URL(newCampaign.wa.href).searchParams.get("text"), /PERFIL_EMPRESA/);
+const explicitPhone = createPage({ consent: "granted", phoneService: "tinte-pestanas" });
+explicitPhone.phone.click();
+assert.equal(explicitPhone.events()[0][2].service, "tinte-pestanas");
+const naturalBrow = createPage({ consent: "granted", url: "https://nohuska.com/tratamientos/nohuska-natural-brow-granollers.html" });
+naturalBrow.wa.click();
+assert.equal(naturalBrow.events()[0][2].service, "nohuska-brow", "Keep historical Natural Brow code");
 const spoofed = createPage({ consent: "granted", referrer: "https://google.es.attacker.example/?instagram.com" });
 spoofed.wa.click();
 assert.equal(spoofed.events()[0][2].source, "referencia-web");
@@ -169,4 +186,15 @@ assert.equal(qa.window.dataLayer.find(entry => entry[0] === "config")[2].debug_m
 for (const page of [granted, denied, blocked, privateUtm, continued, internalUnknown, spoofed, existingReference]) {
   assert.ok(page.events().every(event => !["generate_lead", "nohuska_lead"].includes(event[1])));
 }
-console.log("PASS: contact events, one event per click, consent/revocation, blocked storage, honest attribution, private parameters and working WhatsApp references.");
+for (const [alias, canonical] of [["lifting-coreano", "lifting-pestanas"], ["natural-brow", "nohuska-brow"]]) {
+  const page = createPage({ consent: "granted", waService: alias, phoneService: alias });
+  page.wa.click();
+  page.phone.click();
+  assert.equal(page.wa.dataset.service, canonical);
+  assert.ok(page.events().every(event => event[2].service === canonical));
+  assert.ok(new URL(page.wa.href).searchParams.get("text").includes("WEB-" + canonical.toUpperCase() + "-"));
+  const historical = "Hola\n\nReferencia: WEB-" + alias.toUpperCase() + "-GRANOLLERS-DIRECTO";
+  const old = createPage({ waService: alias, message: historical });
+  assert.equal(new URL(old.wa.href).searchParams.get("text"), historical);
+}
+console.log("PASS: contact events, historical modality aliases/references, consent, attribution and WhatsApp references.");

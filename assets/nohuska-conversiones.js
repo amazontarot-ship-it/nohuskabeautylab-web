@@ -178,6 +178,12 @@
     return "general";
   }
 
+  // Unificar modalidades con códigos históricos sin reescribir datos ni referencias previas.
+  function normalizeService(value) {
+    var aliases = { "lifting-coreano": "lifting-pestanas", "natural-brow": "nohuska-brow" };
+    return aliases[value] || value;
+  }
+
   function getLocation() {
     if (path.indexOf("barcelona") !== -1) return "barcelona";
     if (path.indexOf("valles-oriental") !== -1) return "valles-oriental";
@@ -261,10 +267,11 @@
     var params = new URLSearchParams(window.location.search);
     var current = params.get("utm_campaign");
     var saved = getSessionValue("nohuska_campaign");
-    var candidate = current || saved;
+    // Una nueva fuente UTM inicia otra campaña; no mezclarla con la anterior.
+    var candidate = current || (params.get("utm_source") ? null : saved);
     var campaign = candidate ? (allowedCampaigns.indexOf(candidate) !== -1 ? candidate : "campana-otra") : "sin-campana";
 
-    if (current) setSessionValue("nohuska_campaign", campaign);
+    if (current || params.get("utm_source")) setSessionValue("nohuska_campaign", campaign);
     return campaign;
   }
 
@@ -290,7 +297,7 @@
     if (analyticsConsent !== "granted" || typeof window.gtag !== "function") return;
     var eventData = {
       method: method,
-      service: link.dataset.service || service,
+      service: normalizeService(link.dataset.service || service),
       location: locationName,
       source: source,
       campaign: campaign,
@@ -309,7 +316,7 @@
     try {
       var url = new URL(link.href);
       var message = url.searchParams.get("text") || "Hola Nohuska, quiero información.";
-      var linkService = link.dataset.service || service;
+      var linkService = normalizeService(link.dataset.service || service);
       if (message.indexOf("Referencia: WEB-") === -1) {
         url.searchParams.set("text", message + "\n\nReferencia: " + buildReference(linkService));
         link.href = url.toString();
@@ -338,7 +345,7 @@
   });
 
   document.querySelectorAll('a[href^="tel:"]').forEach(function (link, index) {
-    link.dataset.service = service;
+    link.dataset.service = normalizeService(link.dataset.service || service);
     link.dataset.source = source;
     if (!link.dataset.ctaPosition) link.dataset.ctaPosition = "telefono-" + (index + 1);
   });

@@ -127,7 +127,9 @@ def live_check(url: str) -> tuple[int, str, str]:
 
 
 def audit() -> dict:
-    pages = sorted(ROOT.rglob("*.html"))
+    pages = sorted(p for p in ROOT.rglob("*.html")
+                   if not any(part.startswith(".") or part in {"node_modules", "seo-report"}
+                              for part in p.relative_to(ROOT).parts))
     issues: list[dict[str, str]] = []
     records = []
     parsed_pages: dict[Path, SEOParser] = {}
