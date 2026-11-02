@@ -22,5 +22,17 @@ assert(business.sameAs.some(u=>u.includes('maps.apple.com/place?place-id=IDBEF40
 assert(opina.includes('href="'+reviewUrl+'"'));assert(opina.includes('noindex,follow'));assert(opina.includes('No necesitas seguir un guion ni incluir palabras clave'));
 assert(opina.includes('href="https://www.treatwell.es/establecimiento/nohuska-beauty-lab/"'));
 assert(opina.includes('no un formulario directo de reseña'));
+const brow=fs.readFileSync(path.join(root,'tratamientos/micropigmentacion-cejas-granollers.html'),'utf8');
+const browGraph=JSON.parse(brow.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+const nano=browGraph.find(v=>v['@id']==='https://nohuska.com/tratamientos/micropigmentacion-cejas-granollers.html#nanoblading');
+assert.equal(nano.serviceType,'Nanoblading manual');assert.equal(nano.offers.price,'350.00');assert.equal(nano.offers.priceCurrency,'EUR');
+assert(brow.includes('id="nanoblading"'));
+const priceAnswer=browGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto cuesta la micropigmentación de cejas?').acceptedAnswer.text;
+const visiblePrice=brow.match(/<summary>¿Cuánto cuesta la micropigmentación de cejas\?<\/summary><p>([^]*?)<\/p>/)[1].replace(/<[^>]+>/g,'');
+assert.equal(visiblePrice,priceAnswer,'Visible and structured brow prices must agree');
+assert(priceAnswer.includes('350 € de nanoblading no incluyen retoque'));
+const menu=fs.readFileSync(path.join(root,'tratamientos/guia-tratamientos-nohuska.html'),'utf8');
+assert(menu.includes('Nanoblading: 350 €, retoque no incluido'));
+assert(menu.includes('285 €')&&menu.includes('pelo a pelo, 55 €'));
 assert(home.includes('no reseñas de Google ni una puntuación agregada'));assert(home.includes('href="opina.html"'));assert(home.includes('Click Lash</span>'));assert(home.includes('Extensiones de pestañas pelo a pelo</span>'));
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);

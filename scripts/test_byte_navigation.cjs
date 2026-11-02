@@ -46,4 +46,6 @@ assert.doesNotMatch(read("tratamientos/lifting-pestanas-granollers.html"), /data
 assert.match(read("tratamientos/lifting-pestanas-granollers.html"), /data-service="lifting-pestanas"/);
 assert.match(read("tratamientos/seo-treatment.css"), /@media\(max-width:760px\).*?\.mobile-contact\{display:flex/s);
 assert.match(read("tratamientos/seo-treatment.css"), /html\{scroll-padding-top:100px\}/);
+// The cookie notice must clear the contact bar throughout its 760px breakpoint.
+assert.ok(/@media\(max-width:760px\)\{\.nohuska-cookie-banner\{[^}]*bottom:78px/.test(read("assets/nohuska-conversiones.js")), "Cookie notice must clear the contact bar at widths up to 760px");
 console.log("PASS: firmas destinations, mobile contact routes/messages, responsive rule and lifting labels (static markup).");
