@@ -15,10 +15,10 @@ assert.match(mobileGuide, /data-service="pestanas"/);
 const guideMessage = new URL(mobileGuide.match(/href="([^"]+)"/)[1]).searchParams.get("text");
 for (const modality of ["lifting", "Click Lash", "extensiones pelo a pelo"]) assert.ok(guideMessage.includes(modality));
 // Resolve every local fragment link in the affected pages against the actual file.
-for (const file of ["guias/lifting-o-extensiones-pestanas.html", "tratamientos/facial-contouring-granollers.html", "tratamientos/micropigmentacion-blush-granollers.html"]) {
+for (const file of ["guias/lifting-o-extensiones-pestanas.html", "tratamientos/facial-contouring-granollers.html", "tratamientos/micropigmentacion-blush-granollers.html", "tratamientos/pestanas-granollers.html", "tratamientos/cejas-valles-oriental.html", "opina.html"]) {
   for (const match of read(file).matchAll(/href="([^":]*#[^"]+)"/g)) {
     const [target, fragment] = match[1].split("#");
-    const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(file), target));
+    const resolved = target ? path.posix.normalize(path.posix.join(path.posix.dirname(file), target)) : file;
     assert.ok(read(resolved).includes('id="' + fragment + '"'), file + ": " + match[1]);
   }
 }
