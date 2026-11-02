@@ -45,4 +45,5 @@ for (const [file, expected] of [
 assert.doesNotMatch(read("tratamientos/lifting-pestanas-granollers.html"), /data-service="lifting-coreano"/);
 assert.match(read("tratamientos/lifting-pestanas-granollers.html"), /data-service="lifting-pestanas"/);
 assert.match(read("tratamientos/seo-treatment.css"), /@media\(max-width:760px\).*?\.mobile-contact\{display:flex/s);
+assert.match(read("tratamientos/seo-treatment.css"), /html\{scroll-padding-top:100px\}/);
 console.log("PASS: firmas destinations, mobile contact routes/messages, responsive rule and lifting labels (static markup).");

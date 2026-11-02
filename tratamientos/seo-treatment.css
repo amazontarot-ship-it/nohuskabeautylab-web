@@ -10,3 +10,4 @@
 
 .consultation-choice{padding-block:22px}.consultation-choice label{display:block;font-weight:700;margin-bottom:8px}.consultation-choice select{display:block;width:100%;max-width:560px;min-height:44px;padding:10px;font:inherit;color:var(--ink);background:#fff;border:1px solid var(--muted);border-radius:6px}.consultation-choice select:focus-visible{outline:3px solid var(--deep);outline-offset:3px}.booking-notice{padding-block:18px}.btn{white-space:normal;overflow-wrap:anywhere;text-align:center}@media(max-width:760px){.mobile-contact{white-space:normal;text-align:center;line-height:1.25;padding:10px 16px;min-height:52px;font-size:13px}.consultation-choice select{font-size:16px}}
 .cta p{max-width:66ch;margin-inline:auto}.cta .btn:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+html{scroll-padding-top:100px}
