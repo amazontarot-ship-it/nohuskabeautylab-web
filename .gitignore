@@ -1,1 +1,6 @@
 seo-report/
+# Documentos internos: se guardan fuera de este repositorio público
+outputs/
+docs/
+SEO-*.md
+ANTES-DE-PUBLICAR.md

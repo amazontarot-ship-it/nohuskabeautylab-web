@@ -23,6 +23,8 @@ jobs:
         run: |
           node scripts/test_business_identity.cjs
           node scripts/test_contact_tracking.cjs
+          node scripts/test_iris_journey.cjs
+          node scripts/test_byte_navigation.cjs
 
       - name: Ejecutar auditoría SEO
         id: audit
