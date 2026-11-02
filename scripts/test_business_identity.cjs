@@ -2,6 +2,8 @@
 // Public identity regression checks. Does not access accounts or send reviews.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
+const internalFiles=require('node:child_process').execFileSync('git',['ls-files','outputs/','docs/','backups/','SEO-*.md','ANTES-DE-PUBLICAR.md'],{cwd:root,encoding:'utf8'}).trim();
+assert.equal(internalFiles,'','Internal documents and backups must not be deployed from this public repository');
 const directories=['','tratamientos','guias','pecas'];
 const officialFeature='0x12a4c77ebd55dc5b:0x75c96dffffd853b8';
 const officialPlace='ChIJW9xVvX7HpBIRuFPY__9tyXU';
