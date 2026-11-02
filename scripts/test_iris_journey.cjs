@@ -68,7 +68,14 @@ for (const file of fs.readdirSync(path.join(__dirname, "../tratamientos")).filte
 const lashes = read("tratamientos/pestanas-granollers.html");
 assert.match(lashes, /data-service="extensiones-pelo-a-pelo"/);
 assert.match(lashes, /data-service="pestanas" data-cta-position="alternativa-pestanas"/);
-const browHero = read("tratamientos/micropigmentacion-cejas-granollers.html").match(/href="(https:\/\/wa.me\/[^\"]+)"/)[1];
-assert.match(new URL(browHero).searchParams.get("text"), /información comparativa de microblading y nanoblading, sin dar por confirmada su disponibilidad/);
+const browPage = read("tratamientos/micropigmentacion-cejas-granollers.html");
+const browHero = browPage.match(/href="(https:\/\/wa.me\/[^\"]+)"/)[1];
+assert.match(new URL(browHero).searchParams.get("text"), /valoración gratuita de cejas.*microblading, nanoblading/);
+assert.doesNotMatch(browPage, /sin disponibilidad confirmada|sin confirmar su disponibilidad|sin dar por confirmada|no confirma que se realicen/);
+const browSchema = JSON.parse(browPage.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+for (const technique of ["Microblading manual", "Nanoblading manual"]) {
+  assert.ok(browPage.includes('value="micropigmentacion-cejas">' + technique + '</option>'));
+  assert.ok(browSchema["@graph"].find(node => node["@type"] === "Service").serviceType.includes(technique));
+}
 assert.ok(home.includes('data-service="tinte-cejas"'));
-console.log(`PASS: ${contacts} treatment WhatsApp destinations with predefined context; specific modality tags and informational microblading/nanoblading wording.`);
+console.log(`PASS: ${contacts} treatment WhatsApp destinations with predefined context; specific modality tags and confirmed manual microblading/nanoblading offer.`);
