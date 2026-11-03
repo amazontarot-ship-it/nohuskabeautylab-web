@@ -32,7 +32,7 @@ assert(brow.includes('id="nanoblading"'));
 const priceAnswer=browGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto cuesta la micropigmentación de cejas?').acceptedAnswer.text;
 const visiblePrice=brow.match(/<summary>¿Cuánto cuesta la micropigmentación de cejas\?<\/summary><p>([^]*?)<\/p>/)[1].replace(/<[^>]+>/g,'');
 assert.equal(visiblePrice,priceAnswer,'Visible and structured brow prices must agree');
-assert(priceAnswer.includes('350 € de nanoblading no incluyen retoque'));
+assert(priceAnswer.includes('350 € de microblading y nanoblading no incluyen retoque'));
 const menu=fs.readFileSync(path.join(root,'tratamientos/guia-tratamientos-nohuska.html'),'utf8');
 assert(menu.includes('Nanoblading: 350 €, retoque no incluido'));
 assert(menu.includes('285 €')&&menu.includes('pelo a pelo, 55 €'));
