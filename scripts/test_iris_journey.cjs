@@ -15,9 +15,10 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
   for (const withReference of [false, true]) {
     const links = [...html.matchAll(/<a\b([^>]*href="https:\/\/wa.me\/34624011715[^>]+)>([^<]*)<\/a>/g)].map(m => {
       const service = m[1].match(/data-service="([^"]+)"/)?.[1] || "cejas";
+      const contactIntent = m[1].match(/data-contact-intent="([^"]+)"/)?.[1];
       const url = new URL(m[1].match(/href="([^"]+)"/)[1]);
       if (withReference) url.searchParams.set("text", url.searchParams.get("text") + "\n\nReferencia: WEB-" + service.toUpperCase() + "-GRANOLLERS-INSTAGRAM-SOCIAL");
-      return { href: url.toString(), textContent: m[2], dataset: { service, ctaPosition: "conservada", source: "instagram-social" } };
+      return { href: url.toString(), textContent: m[2], dataset: { service, contactIntent, ctaPosition: "conservada", source: "instagram-social" } };
     });
     assert.ok(links.length >= 2);
     const originals = links.map(link => ({ ...link, dataset: { ...link.dataset } }));
@@ -32,6 +33,15 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
         const url = new URL(link.href);
         assert.equal(url.origin + url.pathname, "https://wa.me/34624011715");
         assert.ok(url.searchParams.get("text").includes(options[i].textContent));
+        if (link.dataset.contactIntent === "valuation") {
+          assert.ok(url.searchParams.get("text").includes("una valoración gratuita de "));
+          assert.equal(link.textContent, "Valoración gratuita: " + options[i].textContent);
+        } else if (link.dataset.contactIntent === "appointment") {
+          assert.ok(url.searchParams.get("text").includes("solicitar cita para "));
+          assert.equal(link.textContent, "Solicitar cita de " + options[i].textContent);
+        } else {
+          assert.equal(link.textContent, "Consultar " + options[i].textContent + " por WhatsApp");
+        }
         assert.equal(link.dataset.service, options[i].value);
         assert.equal(link.dataset.ctaPosition, "conservada");
         assert.equal(link.dataset.source, "instagram-social");
