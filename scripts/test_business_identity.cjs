@@ -35,6 +35,6 @@ assert.equal(visiblePrice,priceAnswer,'Visible and structured brow prices must a
 assert(priceAnswer.includes('350 € de microblading y nanoblading no incluyen retoque'));
 const menu=fs.readFileSync(path.join(root,'tratamientos/guia-tratamientos-nohuska.html'),'utf8');
 assert(menu.includes('Nanoblading: 350 €, retoque no incluido'));
-assert(menu.includes('285 €')&&menu.includes('pelo a pelo, 55 €'));
+assert(menu.includes('285 €')&&menu.includes('pelo a pelo, 60 €'));
 assert(home.includes('no reseñas de Google ni una puntuación agregada'));assert(home.includes('href="opina.html"'));assert(home.includes('Click Lash</span>'));assert(home.includes('Extensiones de pestañas pelo a pelo</span>'));
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);
