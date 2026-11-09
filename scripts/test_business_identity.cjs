@@ -78,4 +78,21 @@ const clickAnswer=lashesGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=
 assert.equal(lashes.match(/<summary>¿Qué es Click Lash\?<\/summary><p>([^]*?)<\/p>/)[1],clickAnswer,'Visible and structured Click Lash price must agree');
 assert(clickAnswer.includes('La tarifa es de 35 €.')&&clickAnswer.includes('30 minutos'));
 assert(home.includes('no reseñas de Google ni una puntuación agregada'));assert(home.includes('href="opina.html"'));assert(home.includes('Click Lash</span>'));assert(home.includes('Extensiones de pestañas pelo a pelo</span>'));
+const results=fs.readFileSync(path.join(root,'resultados.html'),'utf8');
+const resultGraph=JSON.parse(results.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+const caseList=resultGraph.find(v=>v['@type']==='ItemList');
+assert.equal(caseList.numberOfItems,caseList.itemListElement.length,'Case count must match structured entries');
+assert.equal(caseList.numberOfItems,[...results.matchAll(/<figure\b[^>]*\bid="/g)].length,'Every listed case must have a visible figure');
+for(const item of caseList.itemListElement)assert(results.includes('id="'+new URL(item.url).hash.slice(1)+'"'),'Case fragment must exist');
+assert(results.includes('href="tratamientos/micropigmentacion-cejas-granollers.html#resultado-nanoblading"'));
+assert(brow.includes('href="../resultados.html#nanoblading"'),'Existing brow case must connect to the collection');
+const extensionOptions=extensionsGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Qué opciones de pestañas postizas ofrecéis en Granollers?').acceptedAnswer.text;
+assert.equal(extensions.match(/<summary>¿Qué opciones de pestañas postizas ofrecéis en Granollers\?<\/summary><p>([^]*?)<\/p>/)[1],extensionOptions,'Visible and structured extension choices must agree');
+assert(!extensions.includes('Dos opciones para añadir presencia'),'Three active extension services must not be introduced as two');
+for(const file of ['nohuska-natural-brow-granollers.html','lifting-pestanas-granollers.html','limpieza-facial-coreana-granollers.html']){
+ const html=fs.readFileSync(path.join(root,'tratamientos',file),'utf8');
+ assert(/\d+ reseñas del centro/.test(html),file+' must label the rating as business-wide');
+ assert(/<time datetime="\d{4}-\d{2}-\d{2}">/.test(html),file+' must date the Google snapshot');
+ assert(!/"@type"\s*:\s*"(?:Review|AggregateRating)"/.test(html),file+' must not turn its own reviews into rich-result markup');
+}
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);
