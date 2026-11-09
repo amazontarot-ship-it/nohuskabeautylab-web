@@ -47,6 +47,19 @@ assert.equal(barcelona.match(/<summary>¿Cuánto cuesta el nanoblading\?<\/summa
 assert(barcelonaPrice.includes('nanoblading manual tiene una tarifa de referencia de 297 €; el microblading manual, de 350 €'));
 assert(barcelonaPrice.includes('no incluyen retoque'));
 assert(barcelona.includes('content="Microblading 350 € y nanoblading 297 € de referencia para Barcelona'));
-assert(menu.includes('285 €')&&menu.includes('pelo a pelo, 60 €'));
+assert(menu.includes('285 €')&&menu.includes('pelo a pelo, 55 €')&&menu.includes('Click Lash, 35 €, cita de unos 30 minutos'));
+assert(llms.includes('pelo a pelo 55 €, volumen 60 €')&&llms.includes('relleno 45 €, retirada 15 €, Click Lash 35 €'));
+const extensions=fs.readFileSync(path.join(root,'tratamientos/extensiones-pestanas-granollers.html'),'utf8');
+const extensionsGraph=JSON.parse(extensions.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+for(const [fragment,price] of [['pelo-a-pelo','55.00'],['click-lash','35.00']]){const service=extensionsGraph.find(v=>(v['@id']||'').endsWith('#'+fragment));assert.equal(service.offers.price,price);assert.equal(service.offers.priceCurrency,'EUR');}
+const extensionsPrice=extensionsGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto cuestan las extensiones y cuánto dura la cita?').acceptedAnswer.text;
+assert.equal(extensions.match(/<summary>¿Cuánto cuestan las extensiones y cuánto dura la cita\?<\/summary><p>([^]*?)<\/p>/)[1].replace(/<[^>]+>/g,''),extensionsPrice,'Visible and structured extension prices must agree');
+assert(extensionsPrice.includes('Pelo a pelo: 55 €. Volumen (cualquier estilo): 60 €. Relleno: 45 €. Retirada: 15 €. Click Lash: 35 €'));
+assert(extensionsPrice.includes('cita de unos 30 minutos'));
+const lashes=fs.readFileSync(path.join(root,'tratamientos/pestanas-granollers.html'),'utf8');
+const lashesGraph=JSON.parse(lashes.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+const clickAnswer=lashesGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Qué es Click Lash?').acceptedAnswer.text;
+assert.equal(lashes.match(/<summary>¿Qué es Click Lash\?<\/summary><p>([^]*?)<\/p>/)[1],clickAnswer,'Visible and structured Click Lash price must agree');
+assert(clickAnswer.includes('La tarifa es de 35 €.')&&clickAnswer.includes('30 minutos'));
 assert(home.includes('no reseñas de Google ni una puntuación agregada'));assert(home.includes('href="opina.html"'));assert(home.includes('Click Lash</span>'));assert(home.includes('Extensiones de pestañas pelo a pelo</span>'));
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);
