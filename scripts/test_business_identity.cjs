@@ -47,6 +47,22 @@ assert.equal(barcelona.match(/<summary>¿Cuánto cuesta el nanoblading\?<\/summa
 assert(barcelonaPrice.includes('nanoblading manual tiene una tarifa de referencia de 297 €; el microblading manual, de 350 €'));
 assert(barcelonaPrice.includes('no incluyen retoque'));
 assert(barcelona.includes('content="Microblading 350 € y nanoblading 297 € de referencia para Barcelona'));
+for(const file of ['micropigmentacion-cejas-barcelona.html','micropigmentacion-capilar-barcelona.html']){
+ const html=fs.readFileSync(path.join(root,'tratamientos',file),'utf8');
+ const graph=JSON.parse(html.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+ const answer=graph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cómo llego desde Barcelona?').acceptedAnswer.text;
+ assert.equal(html.match(/<summary>¿Cómo llego desde Barcelona\?<\/summary><p>([^]*?)<\/p>/)[1],answer,file+' visible and structured travel instructions');
+ assert(answer.includes('La R8 no pasa por Barcelona ciudad')&&answer.includes('verifica horarios y alteraciones'));
+}
+for(const file of ['micropigmentacion-cejas-barcelona.html','micropigmentacion-capilar-barcelona.html','micropigmentacion-capilar-granollers.html','micropigmentacion-barcelona.html']){
+ const html=fs.readFileSync(path.join(root,'tratamientos',file),'utf8');
+ assert(!html.includes('R2 Nord o R8 hasta'),file+' misleading direct Barcelona route');
+ assert(html.includes('https://rodalies.gencat.cat/ca/alteracions_del_servei'),file+' official travel updates');
+}
+for(const file of ['micropigmentacion-cejas-barcelona.html','cejas-valles-oriental.html','pestanas-valles-oriental.html','limpieza-facial-valles-oriental.html'])assert(menu.includes('href="'+file+'"'),'Treatment guide must link to '+file);
+const comarca=fs.readFileSync(path.join(root,'tratamientos/micropigmentacion-valles-oriental.html'),'utf8');
+assert(comarca.includes('href="micropigmentacion-cejas-granollers.html"'));
+assert(!comarca.match(/<meta name="description"[^>]+>/)[0].includes('Natural Brow'),'Natural Brow is not micropigmentation');
 assert(menu.includes('285 €')&&menu.includes('pelo a pelo, 55 €')&&menu.includes('Click Lash, 35 €, cita de unos 30 minutos'));
 assert(llms.includes('pelo a pelo 55 €, volumen 60 €')&&llms.includes('relleno 45 €, retirada 15 €, Click Lash 35 €'));
 const extensions=fs.readFileSync(path.join(root,'tratamientos/extensiones-pestanas-granollers.html'),'utf8');
