@@ -47,6 +47,20 @@ assert.equal(barcelona.match(/<summary>¿Cuánto cuesta el nanoblading\?<\/summa
 assert(barcelonaPrice.includes('nanoblading manual tiene una tarifa de referencia de 297 €; el microblading manual, de 350 €'));
 assert(barcelonaPrice.includes('no incluyen retoque'));
 assert(barcelona.includes('content="Microblading 350 € y nanoblading 297 € de referencia para Barcelona'));
+assert.equal([...barcelona.matchAll(/<img\b[^>]*src="\.\.\/assets\/nanoblading-cejas-antes-despues-nohuska\.jpg"/g)].length,1,'Barcelona must show its existing case once, not duplicate it');
+assert(barcelona.indexOf('src="../assets/nanoblading-cejas-antes-despues-nohuska.jpg"')<barcelona.indexOf('<div class="facts">'),'Barcelona must show the real case in the hero');
+assert(barcelona.includes('id="caso-nanoblading"'),'Keep the existing case-context fragment');
+const regionalBrows=fs.readFileSync(path.join(root,'tratamientos/cejas-valles-oriental.html'),'utf8');
+assert(regionalBrows.includes('href="nohuska-natural-brow-granollers.html">Natural Brow: diseño, laminado y tinte'));
+assert(regionalBrows.includes('55 € · aproximadamente 1 hora')&&regionalBrows.includes('Repaso no incluido'));
+const generalBrows=fs.readFileSync(path.join(root,'tratamientos/cejas-granollers.html'),'utf8');
+assert(!generalBrows.includes('href="nohuska-natural-brow-granollers.html#laminado-tinte"'),'Enter the service at its offer and evidence, rather than skipping them');
+const regionalLashes=fs.readFileSync(path.join(root,'tratamientos/pestanas-valles-oriental.html'),'utf8');
+const regionalLashGraph=JSON.parse(regionalLashes.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+const regionalTint=regionalLashGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿El lifting coreano incluye tinte?').acceptedAnswer.text;
+assert.equal(regionalLashes.match(/<summary>¿El lifting coreano incluye tinte\?<\/summary><p>([^]*?)<\/p>/)[1],regionalTint,'Regional visible and structured tint inclusion must agree');
+assert(regionalTint.includes('incluye tinte vegano por 55 €'));
+assert(regionalLashes.includes('href="../resultados.html#lifting-coreano"'));
 for(const file of ['micropigmentacion-cejas-barcelona.html','micropigmentacion-capilar-barcelona.html']){
  const html=fs.readFileSync(path.join(root,'tratamientos',file),'utf8');
  const graph=JSON.parse(html.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
