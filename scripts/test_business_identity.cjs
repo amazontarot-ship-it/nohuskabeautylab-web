@@ -109,4 +109,14 @@ for(const file of ['nohuska-natural-brow-granollers.html','lifting-pestanas-gran
  assert(/<time datetime="\d{4}-\d{2}-\d{2}">/.test(html),file+' must date the Google snapshot');
  assert(!/"@type"\s*:\s*"(?:Review|AggregateRating)"/.test(html),file+' must not turn its own reviews into rich-result markup');
 }
+for(const file of ['nohuska-natural-brow-granollers.html','lifting-pestanas-granollers.html']){
+ const html=fs.readFileSync(path.join(root,'tratamientos',file),'utf8');
+ const description=html.match(/<meta name="description" content="([^"]+)"/)[1];
+ assert.equal(description,html.match(/<meta property="og:description" content="([^"]+)"/)[1],file+' search and social descriptions must agree');
+ assert(description.includes('55 €')&&description.includes('1 hora')&&description.includes('valoración gratuita'),file+' snippet must reflect the confirmed offer');
+}
+const naturalSnippet=fs.readFileSync(path.join(root,'tratamientos/nohuska-natural-brow-granollers.html'),'utf8');
+assert.equal([...naturalSnippet.matchAll(/<div class="fact" data-nosnippet>/g)].length,2,'Exclude only the duplicate price/time cards from snippets');
+assert(naturalSnippet.includes('con diseño y tinte incluidos'),'Natural Brow summary must make the package scope explicit');
+assert(!/<(?:main|body)[^>]*data-nosnippet/.test(naturalSnippet),'Keep the treatment content available for search snippets');
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);
