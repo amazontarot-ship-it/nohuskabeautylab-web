@@ -46,7 +46,9 @@ const barcelonaPrice=barcelonaGraph.find(v=>v['@type']==='FAQPage').mainEntity.f
 assert.equal(barcelona.match(/<summary>¿Cuánto cuesta el nanoblading\?<\/summary><p>([^]*?)<\/p>/)[1],barcelonaPrice,'Visible and structured Barcelona prices must agree');
 assert(barcelonaPrice.includes('nanoblading manual tiene una tarifa de referencia de 297 €; el microblading manual, de 350 €'));
 assert(barcelonaPrice.includes('no incluyen retoque'));
-assert(barcelona.includes('content="Microblading 350 € y nanoblading 297 € de referencia para Barcelona'));
+const bcnDescription=barcelona.match(/<meta name="description" content="([^"]+)"/)[1];
+assert(bcnDescription.includes("297 €")&&bcnDescription.includes("350 €")&&bcnDescription.includes("repaso no incluido"));
+assert.equal(bcnDescription,barcelona.match(/<meta property="og:description" content="([^"]+)"/)[1]);
 assert.equal([...barcelona.matchAll(/<img\b[^>]*src="\.\.\/assets\/nanoblading-cejas-antes-despues-nohuska\.jpg"/g)].length,1,'Barcelona must show its existing case once, not duplicate it');
 assert(barcelona.indexOf('src="../assets/nanoblading-cejas-antes-despues-nohuska.jpg"')<barcelona.indexOf('<div class="facts">'),'Barcelona must show the real case in the hero');
 assert(barcelona.includes('id="caso-nanoblading"'),'Keep the existing case-context fragment');
@@ -119,4 +121,14 @@ const naturalSnippet=fs.readFileSync(path.join(root,'tratamientos/nohuska-natura
 assert.equal([...naturalSnippet.matchAll(/<div class="fact" data-nosnippet>/g)].length,2,'Exclude only the duplicate price/time cards from snippets');
 assert(naturalSnippet.includes('con diseño y tinte incluidos'),'Natural Brow summary must make the package scope explicit');
 assert(!/<(?:main|body)[^>]*data-nosnippet/.test(naturalSnippet),'Keep the treatment content available for search snippets');
+const bcnNanoTime=barcelonaGraph.find(v=>v["@type"]==="FAQPage").mainEntity.find(v=>v.name==="¿Cuánto tiempo debo reservar para nanoblading?").acceptedAnswer.text;
+assert.equal(barcelona.match(/<summary>¿Cuánto tiempo debo reservar para nanoblading\?<\/summary><p>([^]*?)<\/p>/)[1],bcnNanoTime);
+assert(bcnNanoTime.includes("aproximadamente 2 horas")&&bcnNanoTime.includes("no está incluido en los 297 €"));
+const bcnHub=fs.readFileSync(path.join(root,"tratamientos/micropigmentacion-barcelona.html"),"utf8");
+assert(bcnHub.includes("micropigmentacion-cejas-barcelona.html#precios-cejas-barcelona")&&barcelona.includes("id=\"precios-cejas-barcelona\""));
+assert(bcnHub.includes("285 €")&&bcnHub.includes("Desde 190 €")&&bcnHub.includes("Desde 450 €"));
+const volumeOffer=extensionsGraph.find(v=>v["@id"]==="https://nohuska.com/tratamientos/extensiones-pestanas-granollers.html#volumen");
+assert.equal(volumeOffer.offers.price,"60.00");assert(extensions.includes("id=\"volumen\""));
+assert(extensions.includes("Click Lash, pelo a pelo o volumen, fecha aproximada"));
+assert(extensions.includes("pelo a pelo 55 €, volumen 60 € y Click Lash 35 €"));
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);
