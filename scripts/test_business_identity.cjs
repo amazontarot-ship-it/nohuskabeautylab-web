@@ -151,4 +151,15 @@ assert.equal(guideImage,lashGuide.match(/<meta property="og:image" content="([^"
 assert(lashGuide.includes('no son extensiones'),'Never present the existing lifting photo as an extensions result');
 assert(lashGuide.includes('data-service="lifting-pestanas" data-cta-position="cierre-guia-lifting"'),'The lifting CTA must not inherit extensions attribution from the guide filename');
 assert(lashGuide.includes('data-service="pestanas" data-cta-position="hero-guia-pestanas"'),'An undecided visitor must retain generic eyelash attribution');
+const naturalFaq=JSON.parse(naturalSnippet.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'].find(v=>v['@type']==='FAQPage');
+for(const question of ['¿Qué incluye el laminado de cejas Natural Brow?','¿Cuánto cuesta el laminado de cejas con diseño y tinte?','¿Cuánto dura el resultado del laminado y del tinte?','¿Qué cuidados indicáis después de Natural Brow?']){
+ const visible=[...naturalSnippet.matchAll(/<summary>([^]*?)<\/summary><p>([^]*?)<\/p>/g)].find(m=>m[1]===question);
+ assert(visible,'Natural Brow must answer the commercial question '+question);
+ assert.equal(visible[2],naturalFaq.mainEntity.find(v=>v.name===question).acceptedAnswer.text,'Visible and structured Natural Brow answers must agree');
+}
+const naturalPrice=naturalFaq.mainEntity.find(v=>v.name==='¿Cuánto cuesta el laminado de cejas con diseño y tinte?').acceptedAnswer.text;
+assert(naturalPrice.includes('servicio completo Natural Brow es de 55 €')&&naturalPrice.includes('El tinte no se suma como un suplemento'));
+const naturalDuration=naturalFaq.mainEntity.find(v=>v.name==='¿Cuánto dura el resultado del laminado y del tinte?').acceptedAnswer.text;
+assert(naturalDuration.includes('5–6 semanas')&&naturalDuration.includes('tinte sobre la piel')&&naturalDuration.includes('7–9 días')&&naturalDuration.includes('no describe su duración sobre el pelo'));
+assert(naturalFaq.mainEntity.find(v=>v.name==='¿Qué cuidados indicáis después de Natural Brow?').acceptedAnswer.text.includes('primeras 48 horas'));
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);
