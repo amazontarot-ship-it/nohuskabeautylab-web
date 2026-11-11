@@ -132,6 +132,14 @@ assert.equal(volumeOffer.offers.price,"60.00");assert(extensions.includes("id=\"
 assert(extensions.includes("Click Lash, pelo a pelo o volumen, fecha aproximada"));
 assert(extensions.includes("pelo a pelo 55 €, volumen 60 € y Click Lash 35 €"));
 const liftingPage=fs.readFileSync(path.join(root,'tratamientos/lifting-pestanas-granollers.html'),'utf8');
+const liftingResult=JSON.parse(liftingPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'].find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto dura el resultado del lifting?').acceptedAnswer.text;
+assert.equal(liftingPage.match(/<summary>¿Cuánto dura el resultado del lifting\?<\/summary><p>([^]*?)<\/p>/)[1],liftingResult,'Visible and structured owner-confirmed lifting duration must agree');
+assert(liftingResult.includes('5–6 semanas')&&liftingResult.includes('no una garantía')&&liftingResult.includes('1 hora'));
+assert(business.hasOfferCatalog.itemListElement.some(v=>v.name==='Extensiones de pestañas: pelo a pelo, volumen y Click Lash'&&v.url==='https://nohuska.com/tratamientos/extensiones-pestanas-granollers.html'),'Homepage catalog must identify the existing extensions service');
+for(const [name,price,fragment] of [['Click Lash','35','click-lash'],['Extensiones de pestañas pelo a pelo','55','pelo-a-pelo'],['Extensiones de pestañas de volumen','60','volumen']]){
+ const card=[...home.matchAll(/<details class="treatment-item">([^]*?)<\/details>/g)].find(m=>m[1].includes('class="treatment-name">'+name+'</span>'));
+ assert(card&&card[1].includes('<strong>'+price+' €</strong>')&&card[1].includes('tratamientos/extensiones-pestanas-granollers.html#'+fragment),'Homepage must route each confirmed extension offer to the matching specialist section');
+}
 const liftingHero=liftingPage.match(/<section class="hero">([^]*?)<\/section>/)[1];
 assert(liftingHero.indexOf('55 €')<liftingHero.indexOf('<img'),'Show the confirmed lifting offer before its photo');
 assert(liftingHero.includes('tinte vegano incluido')&&liftingHero.includes('aproximadamente 1 hora'));
