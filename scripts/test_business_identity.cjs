@@ -170,4 +170,21 @@ assert(naturalPrice.includes('servicio completo Natural Brow es de 55 €')&&nat
 const naturalDuration=naturalFaq.mainEntity.find(v=>v.name==='¿Cuánto dura el resultado del laminado y del tinte?').acceptedAnswer.text;
 assert(naturalDuration.includes('5–6 semanas')&&naturalDuration.includes('tinte sobre la piel')&&naturalDuration.includes('7–9 días')&&naturalDuration.includes('no describe su duración sobre el pelo'));
 assert(naturalFaq.mainEntity.find(v=>v.name==='¿Qué cuidados indicáis después de Natural Brow?').acceptedAnswer.text.includes('primeras 48 horas'));
+for(const file of ['lifting-pestanas-granollers.html','nohuska-natural-brow-granollers.html']){
+ const html=fs.readFileSync(path.join(root,'tratamientos',file),'utf8');
+ const graph=JSON.parse(html.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+ const page=graph.find(v=>v['@type']==='WebPage'),image=page.primaryImageOfPage;
+ assert.equal(page.url,html.match(/rel="canonical" href="([^"]+)"/)[1]);
+ assert.equal(image['@type'],'ImageObject');assert.equal(image.creator['@id'],'https://nohuska.com/#business');
+ assert.equal(image.contentUrl,html.match(/<meta property="og:image" content="([^"]+)"/)[1]);
+ assert.equal(image.url,image.contentUrl);assert(image.width>0&&image.height>0&&image.caption);
+ assert(html.match(/<section class="hero">([^]*?)<\/section>/)[1].includes('src="../assets/'+path.basename(image.contentUrl)+'"'),'The primary image must be the actual authorized hero, not a different business or treatment');
+}
+for(const [html,graph,question] of [[extensions,extensionsGraph,'¿Puedo elegir un efecto natural?'],[liftingPage,JSON.parse(liftingPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'],'¿Qué diferencia hay entre lifting y extensiones de pestañas?']]){
+ const answer=graph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name===question).acceptedAnswer.text;
+ const visible=[...html.matchAll(/<summary>([^]*?)<\/summary><p>([^]*?)<\/p>/g)].find(m=>m[1]===question);
+ assert.equal(visible[2],answer,'Service choice explanations must agree in visible and structured content');
+}
+assert(extensions.includes('<strong>no incluye extensiones</strong>'),'Korean Gaze must not be offered as an extensions bundle');
+assert(!naturalSnippet.includes('Cómo organizar el cuidado después'),'Keep the confirmed care instructions in their FAQ, without repeating the old care block');
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);

@@ -15,7 +15,7 @@ assert.match(mobileGuide, /data-service="pestanas"/);
 const guideMessage = new URL(mobileGuide.match(/href="([^"]+)"/)[1]).searchParams.get("text");
 for (const modality of ["lifting", "Click Lash", "extensiones pelo a pelo"]) assert.ok(guideMessage.includes(modality));
 // Resolve every local fragment link in the affected pages against the actual file.
-for (const file of ["guias/lifting-o-extensiones-pestanas.html", "tratamientos/facial-contouring-granollers.html", "tratamientos/micropigmentacion-blush-granollers.html", "tratamientos/pestanas-granollers.html", "tratamientos/cejas-valles-oriental.html", "tratamientos/micropigmentacion-cejas-barcelona.html", "tratamientos/guia-tratamientos-nohuska.html", "opina.html"]) {
+for (const file of ["guias/lifting-o-extensiones-pestanas.html", "tratamientos/facial-contouring-granollers.html", "tratamientos/micropigmentacion-blush-granollers.html", "tratamientos/pestanas-granollers.html", "tratamientos/extensiones-pestanas-granollers.html", "tratamientos/lifting-pestanas-granollers.html", "tratamientos/nohuska-natural-brow-granollers.html", "tratamientos/cejas-valles-oriental.html", "tratamientos/micropigmentacion-cejas-barcelona.html", "tratamientos/guia-tratamientos-nohuska.html", "opina.html"]) {
   for (const match of read(file).matchAll(/href="([^":]*#[^"]+)"/g)) {
     const [target, fragment] = match[1].split("#");
     const resolved = target ? path.posix.normalize(path.posix.join(path.posix.dirname(file), target)) : file;
@@ -31,7 +31,7 @@ for (const file of ["facial-contouring-granollers.html", "micropigmentacion-blus
 for (const [file, expected] of [
   ["pestanas-granollers.html", /pestañas/],
   ["lifting-pestanas-granollers.html", /lifting coreano con tinte/],
-  ["extensiones-pestanas-granollers.html", /Click Lash o extensiones pelo a pelo/]
+  ["extensiones-pestanas-granollers.html", /extensiones pelo a pelo, volumen y Click Lash/]
 ]) {
   const html = read("tratamientos/" + file);
   assert.match(html, /body class="has-mobile-contact/);
@@ -41,6 +41,13 @@ for (const [file, expected] of [
   assert.equal(url.origin + url.pathname, "https://wa.me/34624011715");
   assert.match(url.searchParams.get("text"), expected, file);
   assert.doesNotMatch(url.searchParams.get("text"), /encontrado en Google/);
+}
+const extensionContactTags = [...read("tratamientos/extensiones-pestanas-granollers.html").matchAll(/<a\b[^>]*data-service="extensiones-pestanas"[^>]*href="(https:\/\/wa\.me\/[^\"]+)"[^>]*>/g)];
+assert.ok(extensionContactTags.length > 0);
+for (const tag of extensionContactTags) {
+  const url = new URL(tag[1]);
+  assert.equal(url.origin + url.pathname, "https://wa.me/34624011715");
+  for (const modality of ["pelo a pelo", "volumen", "Click Lash"]) assert.ok(url.searchParams.get("text").includes(modality), "Generic extensions contact must retain all three choices");
 }
 assert.doesNotMatch(read("tratamientos/lifting-pestanas-granollers.html"), /data-service="lifting-coreano"/);
 assert.match(read("tratamientos/lifting-pestanas-granollers.html"), /data-service="lifting-pestanas"/);
