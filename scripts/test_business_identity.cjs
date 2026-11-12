@@ -80,13 +80,13 @@ const comarca=fs.readFileSync(path.join(root,'tratamientos/micropigmentacion-val
 assert(comarca.includes('href="micropigmentacion-cejas-granollers.html"'));
 assert(!comarca.match(/<meta name="description"[^>]+>/)[0].includes('Natural Brow'),'Natural Brow is not micropigmentation');
 assert(menu.includes('285 €')&&menu.includes('pelo a pelo, 55 €')&&menu.includes('Click Lash, 35 €, cita de unos 30 minutos'));
-assert(llms.includes('pelo a pelo 55 €, volumen 60 €')&&llms.includes('relleno 45 €, retirada 15 €, Click Lash 35 €'));
+assert(llms.includes('pelo a pelo 55 €, volumen 55 €')&&llms.includes('relleno 35 €, retirada 15 €, Click Lash 35 €'));
 const extensions=fs.readFileSync(path.join(root,'tratamientos/extensiones-pestanas-granollers.html'),'utf8');
 const extensionsGraph=JSON.parse(extensions.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
 for(const [fragment,price] of [['pelo-a-pelo','55.00'],['click-lash','35.00']]){const service=extensionsGraph.find(v=>(v['@id']||'').endsWith('#'+fragment));assert.equal(service.offers.price,price);assert.equal(service.offers.priceCurrency,'EUR');}
 const extensionsPrice=extensionsGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto cuestan las extensiones y cuánto dura la cita?').acceptedAnswer.text;
 assert.equal(extensions.match(/<summary>¿Cuánto cuestan las extensiones y cuánto dura la cita\?<\/summary><p>([^]*?)<\/p>/)[1].replace(/<[^>]+>/g,''),extensionsPrice,'Visible and structured extension prices must agree');
-assert(extensionsPrice.includes('Pelo a pelo: 55 €. Volumen (cualquier estilo): 60 €. Relleno: 45 €. Retirada: 15 €. Click Lash: 35 €'));
+assert(extensionsPrice.includes('Pelo a pelo: 55 €. Volumen (cualquier estilo): 55 €. Relleno: 35 €. Retirada: 15 €. Click Lash: 35 €'));
 assert(extensionsPrice.includes('cita de unos 30 minutos'));
 const lashes=fs.readFileSync(path.join(root,'tratamientos/pestanas-granollers.html'),'utf8');
 const lashesGraph=JSON.parse(lashes.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
@@ -128,15 +128,15 @@ const bcnHub=fs.readFileSync(path.join(root,"tratamientos/micropigmentacion-barc
 assert(bcnHub.includes("micropigmentacion-cejas-barcelona.html#precios-cejas-barcelona")&&barcelona.includes("id=\"precios-cejas-barcelona\""));
 assert(bcnHub.includes("285 €")&&bcnHub.includes("Desde 190 €")&&bcnHub.includes("Desde 450 €"));
 const volumeOffer=extensionsGraph.find(v=>v["@id"]==="https://nohuska.com/tratamientos/extensiones-pestanas-granollers.html#volumen");
-assert.equal(volumeOffer.offers.price,"60.00");assert(extensions.includes("id=\"volumen\""));
+assert.equal(volumeOffer.offers.price,"55.00");assert(extensions.includes("id=\"volumen\""));
 assert(extensions.includes("Click Lash, pelo a pelo o volumen, fecha aproximada"));
-assert(extensions.includes("pelo a pelo 55 €, volumen 60 € y Click Lash 35 €"));
+assert(extensions.includes("pelo a pelo 55 €, volumen 55 € y Click Lash 35 €"));
 const liftingPage=fs.readFileSync(path.join(root,'tratamientos/lifting-pestanas-granollers.html'),'utf8');
 const liftingResult=JSON.parse(liftingPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'].find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto dura el resultado del lifting?').acceptedAnswer.text;
 assert.equal(liftingPage.match(/<summary>¿Cuánto dura el resultado del lifting\?<\/summary><p>([^]*?)<\/p>/)[1],liftingResult,'Visible and structured owner-confirmed lifting duration must agree');
 assert(liftingResult.includes('5–6 semanas')&&liftingResult.includes('no una garantía')&&liftingResult.includes('1 hora'));
 assert(business.hasOfferCatalog.itemListElement.some(v=>v.name==='Extensiones de pestañas: pelo a pelo, volumen y Click Lash'&&v.url==='https://nohuska.com/tratamientos/extensiones-pestanas-granollers.html'),'Homepage catalog must identify the existing extensions service');
-for(const [name,price,fragment] of [['Click Lash','35','click-lash'],['Extensiones de pestañas pelo a pelo','55','pelo-a-pelo'],['Extensiones de pestañas de volumen','60','volumen']]){
+for(const [name,price,fragment] of [['Click Lash','35','click-lash'],['Extensiones de pestañas pelo a pelo','55','pelo-a-pelo'],['Extensiones de pestañas de volumen','55','volumen']]){
  const card=[...home.matchAll(/<details class="treatment-item">([^]*?)<\/details>/g)].find(m=>m[1].includes('class="treatment-name">'+name+'</span>'));
  assert(card&&card[1].includes('<strong>'+price+' €</strong>')&&card[1].includes('tratamientos/extensiones-pestanas-granollers.html#'+fragment),'Homepage must route each confirmed extension offer to the matching specialist section');
 }
@@ -144,7 +144,7 @@ const liftingHero=liftingPage.match(/<section class="hero">([^]*?)<\/section>/)[
 assert(liftingHero.indexOf('55 €')<liftingHero.indexOf('<img'),'Show the confirmed lifting offer before its photo');
 assert(liftingHero.includes('tinte vegano incluido')&&liftingHero.includes('aproximadamente 1 hora'));
 const extensionHero=extensions.match(/<section class="hero">([^]*?)<\/section>/)[1];
-for(const price of ['Pelo a pelo: 55 €','Volumen: 60 €','Click Lash: 35 €'])assert(extensionHero.indexOf(price)>=0&&extensionHero.indexOf(price)<extensionHero.indexOf('<img'),'Show all three extension options before the photo');
+for(const price of ['Pelo a pelo: 55 €','Volumen: 55 €','Click Lash: 35 €'])assert(extensionHero.indexOf(price)>=0&&extensionHero.indexOf(price)<extensionHero.indexOf('<img'),'Show all three extension options before the photo');
 assert(lashesGraph.find(v=>v['@type']==='Service').serviceType.includes('Extensiones de pestañas de volumen'));
 assert(lashes.includes('href="extensiones-pestanas-granollers.html#volumen"'),'The hub must route volume searches to the specialist page');
 const lashGuide=fs.readFileSync(path.join(root,'guias/lifting-o-extensiones-pestanas.html'),'utf8');
