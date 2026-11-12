@@ -160,7 +160,7 @@ assert(lashGuide.includes('no son extensiones'),'Never present the existing lift
 assert(lashGuide.includes('data-service="lifting-pestanas" data-cta-position="cierre-guia-lifting"'),'The lifting CTA must not inherit extensions attribution from the guide filename');
 assert(lashGuide.includes('data-service="pestanas" data-cta-position="hero-guia-pestanas"'),'An undecided visitor must retain generic eyelash attribution');
 const naturalFaq=JSON.parse(naturalSnippet.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'].find(v=>v['@type']==='FAQPage');
-for(const question of ['¿Qué incluye el laminado de cejas Natural Brow?','¿Cuánto cuesta el laminado de cejas con diseño y tinte?','¿Cuánto dura el resultado del laminado y del tinte?','¿Qué cuidados indicáis después de Natural Brow?']){
+for(const question of ['¿Qué incluye el laminado de cejas Natural Brow?','¿Qué diferencia hay entre Natural Brow™ y Korean Gaze™?','¿Cuánto cuesta el laminado de cejas con diseño y tinte?','¿Cuánto dura el resultado del laminado y del tinte?','¿Qué cuidados indicáis después de Natural Brow?']){
  const visible=[...naturalSnippet.matchAll(/<summary>([^]*?)<\/summary><p>([^]*?)<\/p>/g)].find(m=>m[1]===question);
  assert(visible,'Natural Brow must answer the commercial question '+question);
  assert.equal(visible[2],naturalFaq.mainEntity.find(v=>v.name===question).acceptedAnswer.text,'Visible and structured Natural Brow answers must agree');
@@ -170,6 +170,13 @@ assert(naturalPrice.includes('servicio completo Natural Brow es de 55 €')&&nat
 const naturalDuration=naturalFaq.mainEntity.find(v=>v.name==='¿Cuánto dura el resultado del laminado y del tinte?').acceptedAnswer.text;
 assert(naturalDuration.includes('5–6 semanas')&&naturalDuration.includes('tinte sobre la piel')&&naturalDuration.includes('7–9 días')&&naturalDuration.includes('no describe su duración sobre el pelo'));
 assert(naturalFaq.mainEntity.find(v=>v.name==='¿Qué cuidados indicáis después de Natural Brow?').acceptedAnswer.text.includes('primeras 48 horas'));
+const naturalChoice=naturalSnippet.match(/<section[^>]*aria-labelledby="elegir-natural-brow"[^>]*>([^]*?)<\/section>/)[1];
+assert(naturalChoice.includes('<caption>Qué opción valorar según tu objetivo</caption>'));
+assert.equal([...naturalChoice.matchAll(/<th scope="row">/g)].length,4,'Keep the four customer goals distinct, without inventing separate laminating offers');
+for(const offer of ['Natural Brow™ · 55 € · aprox. 1 hora','Korean Gaze™ · 85 € · aprox. 90 minutos'])assert(naturalChoice.includes(offer),'Choice table must show the confirmed package scope and appointment time');
+for(const target of ['cejas-granollers.html','tinte-hibrido-cejas-granollers.html','nohuska-korean-gaze-granollers.html','micropigmentacion-cejas-granollers.html'])assert(naturalChoice.includes('href="'+target+'"'),'Alternative intentions must point to their existing service, not compete on this page');
+assert(naturalChoice.includes('El tinte está incluido en los 55 €, no es un suplemento')&&naturalChoice.includes('No incluye extensiones ni micropigmentación'));
+assert(!naturalSnippet.includes('sin un procedimiento semipermanente'),'Distinguish laminating from micropigmentation, not by claiming it has no temporary effect');
 for(const file of ['lifting-pestanas-granollers.html','nohuska-natural-brow-granollers.html']){
  const html=fs.readFileSync(path.join(root,'tratamientos',file),'utf8');
  const graph=JSON.parse(html.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
