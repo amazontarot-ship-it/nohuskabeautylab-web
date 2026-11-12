@@ -12,6 +12,11 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
   assert.match(html, /<label for="consultation-choice">/);
   assert.ok(html.indexOf("nohuska-conversiones.js") < html.indexOf("nohuska-recorrido.js"));
   const options = [...html.matchAll(/<option value="([^"]*)">([^<]*)<\/option>/g)].map(m => ({ value: m[1], textContent: m[2] }));
+  if (file === "extensiones-pestanas-granollers.html") {
+    for (const label of ["Relleno de extensiones · 45 €", "Retirada de extensiones · 15 €"]) {
+      assert.ok(options.some(option => option.textContent === label && option.value === "extensiones-pestanas"), "Maintenance choices must retain the existing extensions family");
+    }
+  }
   for (const withReference of [false, true]) {
     const links = [...html.matchAll(/<a\b([^>]*href="https:\/\/wa.me\/34624011715[^>]+)>([^<]*)<\/a>/g)].map(m => {
       const service = m[1].match(/data-service="([^"]+)"/)?.[1] || "cejas";

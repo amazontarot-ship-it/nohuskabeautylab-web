@@ -193,5 +193,9 @@ for(const [html,graph,question] of [[extensions,extensionsGraph,'¿Puedo elegir 
  assert.equal(visible[2],answer,'Service choice explanations must agree in visible and structured content');
 }
 assert(extensions.includes('<strong>no incluye extensiones</strong>'),'Korean Gaze must not be offered as an extensions bundle');
+const gazePage=fs.readFileSync(path.join(root,'tratamientos/nohuska-korean-gaze-granollers.html'),'utf8');
+const gazeHero=gazePage.match(/<section class="hero">([^]*?)<\/section>/)[1];
+for(const offer of ['85 €','aproximadamente 90 minutos'])assert(gazeHero.indexOf(offer)>=0&&gazeHero.indexOf(offer)<gazeHero.indexOf('<img'),'Show the confirmed Korean Gaze offer before its photos');
+assert(gazePage.includes('No documentan una secuencia antes y después de una misma sesión de Korean Gaze'),'Separate component references from evidence of one complete pack result');
 assert(!naturalSnippet.includes('Cómo organizar el cuidado después'),'Keep the confirmed care instructions in their FAQ, without repeating the old care block');
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);
