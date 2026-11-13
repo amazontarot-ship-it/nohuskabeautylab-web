@@ -221,4 +221,8 @@ assert(tintMessage.includes('tinte de cejas general por 25 euros'),'Generic tint
 const hybridMessage=new URL(tintPage.match(/data-service="tinte-hibrido-cejas"[^>]*href="([^"]+)"/)[1]).searchParams.get('text');
 assert(hybridMessage.includes('tinte híbrido de cejas'),'Hybrid tint WhatsApp must retain the distinct modality');
 assert(!tintPage.includes('tinte de cejas solo cuesta 35 €'),'Do not conflate general and hybrid tint prices');
+assert(liftingPage.includes('<q>Me hice el lifting de pestañas + tinte. Me ha encantado</q> — Alba Castelló.'),'The lifting excerpt must remain a faithful attributed quotation, not an invented testimonial');
+assert(liftingPage.includes('href="https://share.google/avmiWneWwmrhqdJWC"')&&liftingPage.includes('es una opinión individual, no una garantía de resultado'),'Keep the verified original review source and individual-experience limitation');
+const homeBrowChoice=home.match(/<a class="seo-path" href="tratamientos\/micropigmentacion-cejas-granollers.html">([^]*?)<\/a>/)[1];
+assert(homeBrowChoice.includes('Nanoblading manual: 297 € · sesión inicial de aproximadamente 2 horas · repaso no incluido'),'The homepage cited by assistants must expose the confirmed nanoblading price, initial appointment time and excluded follow-up');
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);

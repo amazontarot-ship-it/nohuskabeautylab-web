@@ -7,7 +7,7 @@
   var analyticsId = "G-EV7CGL8W75";
   var consentKey = "nohuska_analytics_consent";
   var analyticsConsent = getStoredConsent();
-  var allowedSources = ["google", "instagram", "facebook", "booksy", "chatgpt", "bing", "whatsapp", "newsletter", "internal-test"];
+  var allowedSources = ["google", "instagram", "facebook", "booksy", "chatgpt", "gemini", "perplexity", "copilot", "claude", "bing", "whatsapp", "newsletter", "internal-test"];
   var allowedMediums = ["organic", "referral", "social", "email", "cpc", "paid-social", "qa"];
   // Solo códigos públicos revisados: nunca nombres, teléfonos o texto libre.
   var allowedCampaigns = ["perfil_empresa_granollers", "reserva_perfil_empresa", "gbp_micropigmentacion_cejas_oct2026", "gbp_korean_gaze_oct2026", "christmas_glow_2026", "whatsapp-qa-20261022"];
@@ -54,6 +54,7 @@
     };
     var params = new URLSearchParams(window.location.search);
     var campaignSource = (params.get("utm_source") || "").toLowerCase();
+    campaignSource = getAiSource(campaignSource) || campaignSource;
     var campaignMedium = (params.get("utm_medium") || "").toLowerCase();
     // Conservar atribución GA4 de las campañas públicas aunque se suprima la query.
     if (campaignSource) {
@@ -231,9 +232,19 @@
     }
   }
 
+  function getAiSource(host) {
+    if (/(^|\.)chatgpt\.com$/.test(host)) return "chatgpt";
+    if (/^(www\.)?gemini\.google\.com$/.test(host)) return "gemini";
+    if (/^(www\.)?perplexity\.ai$/.test(host)) return "perplexity";
+    if (/^(www\.)?(copilot\.microsoft\.com|copilot\.com)$/.test(host)) return "copilot";
+    if (/^(www\.)?claude\.ai$/.test(host)) return "claude";
+    return "";
+  }
+
   function getSource() {
     var params = new URLSearchParams(window.location.search);
     var campaignSource = (params.get("utm_source") || "").toLowerCase();
+    campaignSource = getAiSource(campaignSource) || campaignSource;
     var campaignMedium = (params.get("utm_medium") || "").toLowerCase();
     var saved = getSessionValue("nohuska_source");
     var referrerHost = "";
@@ -247,14 +258,14 @@
     if (campaignSource) {
       source = allowedSources.indexOf(campaignSource) !== -1 ? campaignSource : "campana-otra";
       if (allowedMediums.indexOf(campaignMedium) !== -1) source += "-" + campaignMedium;
-    } else if (saved && (/^(google|instagram|facebook|booksy|chatgpt|bing|whatsapp|newsletter|internal-test|campana-otra)(-(organic|referral|social|email|cpc|paid-social|organico|qa))?$/.test(saved) || saved === "referencia-web" || saved === "directo-o-desconocido")) {
+    } else if (saved && (/^(google|instagram|facebook|booksy|chatgpt|gemini|perplexity|copilot|claude|bing|whatsapp|newsletter|internal-test|campana-otra)(-(organic|referral|social|email|cpc|paid-social|organico|qa))?$/.test(saved) || saved === "referencia-web" || saved === "directo-o-desconocido")) {
       source = saved;
+    } else if (getAiSource(referrerHost)) {
+      source = getAiSource(referrerHost);
     } else if (/(^|\.)google\.(com|es|cat|fr|de|it|pt|co\.uk)$/.test(referrerHost)) {
       source = "google-organico";
     } else if (/(^|\.)instagram\.com$/.test(referrerHost)) {
       source = "instagram";
-    } else if (/(^|\.)chatgpt\.com$/.test(referrerHost)) {
-      source = "chatgpt";
     } else if (referrerHost && referrerHost !== window.location.hostname && !/^(www\.)?(nohuska\.com|nohuskabeautylab\.com)$/.test(referrerHost)) {
       source = "referencia-web";
     }

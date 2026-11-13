@@ -197,4 +197,47 @@ for (const [alias, canonical] of [["lifting-coreano", "lifting-pestanas"], ["nat
   const old = createPage({ waService: alias, message: historical });
   assert.equal(new URL(old.wa.href).searchParams.get("text"), historical);
 }
-console.log("PASS: contact events, historical modality aliases/references, consent, attribution and WhatsApp references.");
+for (const [source, hosts] of [
+  ["chatgpt", ["chatgpt.com", "www.chatgpt.com"]],
+  ["gemini", ["gemini.google.com"]],
+  ["perplexity", ["perplexity.ai", "www.perplexity.ai"]],
+  ["copilot", ["copilot.microsoft.com", "copilot.com"]],
+  ["claude", ["claude.ai"]]
+]) {
+  for (const utmSource of [source, ...hosts]) {
+    const page = createPage({ consent: "granted", url: "https://nohuska.com/?utm_source=" + utmSource + "&utm_medium=referral" });
+    page.wa.click();
+    assert.equal(page.events()[0][2].source, source + "-referral");
+    assert.equal(page.window.dataLayer.find(event => event[0] === "config")[2].campaign_source, source);
+    const next = createPage({ consent: "granted", referrer: "https://nohuska.com/", session: page.window.sessionStorage.values });
+    next.wa.click();
+    assert.equal(next.events()[0][2].source, source + "-referral", "Keep AI attribution through internal navigation");
+  }
+  for (const host of hosts) {
+    const page = createPage({ consent: "granted", referrer: "https://" + host + "/private-conversation?prompt=private-prompt" });
+    page.wa.click();
+    assert.equal(page.events()[0][2].source, source);
+    assert.match(new URL(page.wa.href).searchParams.get("text"), new RegExp("GRANOLLERS-" + source.toUpperCase() + "$"));
+    assert.doesNotMatch(JSON.stringify(page.window.dataLayer) + page.wa.href, /private-conversation|private-prompt/);
+    assert.deepEqual(Array.from(page.events(), event => event[1]), ["click_whatsapp"], "An AI click is not a lead or booking");
+    const next = createPage({ consent: "granted", referrer: "https://nohuska.com/", session: page.window.sessionStorage.values });
+    next.wa.click();
+    assert.equal(next.events()[0][2].source, source);
+    const fake = createPage({ consent: "granted", referrer: "https://" + host + ".attacker.example/" });
+    fake.wa.click();
+    assert.equal(fake.events()[0][2].source, "referencia-web", "An AI name inside a foreign hostname is not a match");
+    const fakeUtm = createPage({ consent: "granted", url: "https://nohuska.com/?utm_source=" + host + ".attacker.example" });
+    fakeUtm.wa.click();
+    assert.equal(fakeUtm.events()[0][2].source, "campana-otra");
+    const retained = createPage({ consent: "granted", referrer: "https://" + host + "/", session: { nohuska_source: "google-organic" } });
+    retained.wa.click();
+    assert.equal(retained.events()[0][2].source, "google-organic", "Keep the existing session attribution priority");
+    for (const consent of [undefined, "denied"]) {
+      const deniedAi = createPage({ consent, referrer: "https://" + host + "/", url: "https://nohuska.com/?utm_source=" + source + "&utm_medium=referral" });
+      deniedAi.wa.click();
+      assert.equal(deniedAi.events().length, 0);assert.equal(deniedAi.scripts().length, 0);
+      assert.equal(deniedAi.window.sessionStorage.reads, 0);assert.equal(deniedAi.window.sessionStorage.writes, 0);
+    }
+  }
+}
+console.log("PASS: contact events, historical modality aliases/references, consent, AI attribution and WhatsApp references.");
