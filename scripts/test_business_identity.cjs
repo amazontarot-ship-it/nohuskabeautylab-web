@@ -143,9 +143,9 @@ for(const [name,price,fragment] of [['Click Lash','35','click-lash'],['Extension
 const liftingHero=liftingPage.match(/<section class="hero">([^]*?)<\/section>/)[1];
 const liftingLimits=JSON.parse(liftingPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'].find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Qué desventajas tiene el lifting de pestañas?').acceptedAnswer.text;
 assert.equal(liftingPage.match(/<summary>¿Qué desventajas tiene el lifting de pestañas\?<\/summary><p>([^]*?)<\/p>/)[1],liftingLimits,'Visible and structured lifting limitations must agree');
-for(const [name,price,url] of [['Lifting de pestañas · Lash Lift','55','lifting-pestanas-granollers.html'],['Nohuska Korean Gaze™','85','nohuska-korean-gaze-granollers.html']]){
+for(const [name,price,url] of [['Lifting de pestañas · Lash Lift','55','lifting-pestanas-granollers.html'],['Nohuska Korean Gaze™','85','nohuska-korean-gaze-granollers.html'],['Laminado de cejas','55','nohuska-natural-brow-granollers.html'],['Natural Brow™','55','nohuska-natural-brow-granollers.html'],['Tinte híbrido','35','tinte-hibrido-cejas-granollers.html']]){
  const card=[...home.matchAll(/<details class="treatment-item">([^]*?)<\/details>/g)].find(m=>m[1].includes('class="treatment-name">'+name+'</span>'));
- assert(card&&card[1].includes(price+' €')&&card[1].includes('href="tratamientos/'+url+'"'),'Homepage lifting and pack cards must expose their confirmed offer and matching detail page');
+ assert(card&&card[1].includes(price+' €')&&card[1].includes('href="tratamientos/'+url+'"'),'Homepage commercial cards must expose their confirmed offer and matching detail page');
 }
 assert(liftingHero.indexOf('55 €')<liftingHero.indexOf('<img'),'Show the confirmed lifting offer before its photo');
 assert(liftingHero.includes('tinte vegano incluido')&&liftingHero.includes('aproximadamente 1 hora'));
@@ -180,7 +180,7 @@ const naturalChoice=naturalSnippet.match(/<section[^>]*aria-labelledby="elegir-n
 assert(naturalChoice.includes('<caption>Qué opción valorar según tu objetivo</caption>'));
 assert.equal([...naturalChoice.matchAll(/<th scope="row">/g)].length,4,'Keep the four customer goals distinct, without inventing separate laminating offers');
 for(const offer of ['Natural Brow™ · 55 € · aprox. 1 hora','Korean Gaze™ · 85 € · aprox. 90 minutos'])assert(naturalChoice.includes(offer),'Choice table must show the confirmed package scope and appointment time');
-for(const target of ['cejas-granollers.html','tinte-hibrido-cejas-granollers.html','nohuska-korean-gaze-granollers.html','micropigmentacion-cejas-granollers.html'])assert(naturalChoice.includes('href="'+target+'"'),'Alternative intentions must point to their existing service, not compete on this page');
+for(const target of ['cejas-granollers.html','tinte-hibrido-cejas-granollers.html#tinte-cejas-solo','nohuska-korean-gaze-granollers.html','micropigmentacion-cejas-granollers.html'])assert(naturalChoice.includes('href="'+target+'"'),'Alternative intentions must point to their existing service, not compete on this page');
 assert(naturalChoice.includes('El tinte está incluido en los 55 €, no es un suplemento')&&naturalChoice.includes('No incluye extensiones ni micropigmentación'));
 assert(!naturalSnippet.includes('sin un procedimiento semipermanente'),'Distinguish laminating from micropigmentation, not by claiming it has no temporary effect');
 for(const file of ['lifting-pestanas-granollers.html','nohuska-natural-brow-granollers.html']){
@@ -204,4 +204,21 @@ const gazeHero=gazePage.match(/<section class="hero">([^]*?)<\/section>/)[1];
 for(const offer of ['85 €','aproximadamente 90 minutos'])assert(gazeHero.indexOf(offer)>=0&&gazeHero.indexOf(offer)<gazeHero.indexOf('<img'),'Show the confirmed Korean Gaze offer before its photos');
 assert(gazePage.includes('No documentan una secuencia antes y después de una misma sesión de Korean Gaze'),'Separate component references from evidence of one complete pack result');
 assert(!naturalSnippet.includes('Cómo organizar el cuidado después'),'Keep the confirmed care instructions in their FAQ, without repeating the old care block');
+const tintPage=fs.readFileSync(path.join(root,'tratamientos/tinte-hibrido-cejas-granollers.html'),'utf8');
+const tintGraph=JSON.parse(tintPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+for(const [name,price] of [['Tinte híbrido de cejas en Granollers','35.00'],['Tinte de cejas solo en Granollers','25.00']]){
+ const offer=tintGraph.find(v=>v['@type']==='Service'&&v.name===name).offers;
+ assert.equal(offer.price,price);assert.equal(offer.priceCurrency,'EUR');
+ const fragment=new URL(offer.url).hash.slice(1);if(fragment)assert(tintPage.includes('id="'+fragment+'"'));
+}
+const tintPrice=tintGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto cuesta el tinte de cejas solo?').acceptedAnswer.text;
+assert.equal(tintPage.match(/<summary>¿Cuánto cuesta el tinte de cejas solo\?<\/summary><p>([^]*?)<\/p>/)[1],tintPrice,'Visible and structured tint prices must agree');
+assert(tintPrice.includes('general cuesta 25 €')&&tintPrice.includes('híbrido cuesta 35 €')&&tintPrice.includes('Natural Brow cuesta 55 €')&&tintPrice.includes('ya incluye el tinte, sin suplemento'));
+const tintChoice=tintPage.match(/<section class="section" id="tinte-cejas-solo">([^]*?)<\/section>/)[1];
+assert(tintChoice.includes('tinte de cejas general cuesta 25 €')&&tintChoice.includes('tinte híbrido cuesta 35 €'));
+const tintMessage=new URL(tintChoice.match(/href="(https:\/\/wa.me\/[^"]+)"/)[1]).searchParams.get('text');
+assert(tintMessage.includes('tinte de cejas general por 25 euros'),'Generic tint WhatsApp must retain its confirmed 25 euro offer');
+const hybridMessage=new URL(tintPage.match(/data-service="tinte-hibrido-cejas"[^>]*href="([^"]+)"/)[1]).searchParams.get('text');
+assert(hybridMessage.includes('tinte híbrido de cejas'),'Hybrid tint WhatsApp must retain the distinct modality');
+assert(!tintPage.includes('tinte de cejas solo cuesta 35 €'),'Do not conflate general and hybrid tint prices');
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);
