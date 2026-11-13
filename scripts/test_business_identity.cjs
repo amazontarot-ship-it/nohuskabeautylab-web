@@ -141,6 +141,12 @@ for(const [name,price,fragment] of [['Click Lash','35','click-lash'],['Extension
  assert(card&&card[1].includes('<strong>'+price+' €</strong>')&&card[1].includes('tratamientos/extensiones-pestanas-granollers.html#'+fragment),'Homepage must route each confirmed extension offer to the matching specialist section');
 }
 const liftingHero=liftingPage.match(/<section class="hero">([^]*?)<\/section>/)[1];
+const liftingLimits=JSON.parse(liftingPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'].find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Qué desventajas tiene el lifting de pestañas?').acceptedAnswer.text;
+assert.equal(liftingPage.match(/<summary>¿Qué desventajas tiene el lifting de pestañas\?<\/summary><p>([^]*?)<\/p>/)[1],liftingLimits,'Visible and structured lifting limitations must agree');
+for(const [name,price,url] of [['Lifting de pestañas · Lash Lift','55','lifting-pestanas-granollers.html'],['Nohuska Korean Gaze™','85','nohuska-korean-gaze-granollers.html']]){
+ const card=[...home.matchAll(/<details class="treatment-item">([^]*?)<\/details>/g)].find(m=>m[1].includes('class="treatment-name">'+name+'</span>'));
+ assert(card&&card[1].includes(price+' €')&&card[1].includes('href="tratamientos/'+url+'"'),'Homepage lifting and pack cards must expose their confirmed offer and matching detail page');
+}
 assert(liftingHero.indexOf('55 €')<liftingHero.indexOf('<img'),'Show the confirmed lifting offer before its photo');
 assert(liftingHero.includes('tinte vegano incluido')&&liftingHero.includes('aproximadamente 1 hora'));
 const extensionHero=extensions.match(/<section class="hero">([^]*?)<\/section>/)[1];
