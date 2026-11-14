@@ -81,7 +81,7 @@ for (const file of fs.readdirSync(path.join(__dirname, "../tratamientos")).filte
   }
 }
 const lashes = read("tratamientos/pestanas-granollers.html");
-assert.match(lashes, /data-service="extensiones-pelo-a-pelo"/);
+assert.match(lashes, /data-service="extensiones-pestanas" data-cta-position="hero-extensiones"/);
 assert.match(lashes, /data-service="pestanas" data-cta-position="alternativa-pestanas"/);
 const browPage = read("tratamientos/micropigmentacion-cejas-granollers.html");
 const browHero = browPage.match(/href="(https:\/\/wa.me\/[^\"]+)"/)[1];

@@ -153,6 +153,10 @@ const extensionHero=extensions.match(/<section class="hero">([^]*?)<\/section>/)
 for(const price of ['Pelo a pelo: 55 €','Volumen: 55 €','Click Lash: 35 €'])assert(extensionHero.indexOf(price)>=0&&extensionHero.indexOf(price)<extensionHero.indexOf('<img'),'Show all three extension options before the photo');
 assert(lashesGraph.find(v=>v['@type']==='Service').serviceType.includes('Extensiones de pestañas de volumen'));
 assert(lashes.includes('href="extensiones-pestanas-granollers.html#volumen"'),'The hub must route volume searches to the specialist page');
+const lashHubCta=lashes.match(/<a [^>]*data-cta-position="hero-extensiones"[^>]*>/)[0];
+const lashHubMessage=new URL(lashHubCta.match(/href="([^"]+)"/)[1]).searchParams.get('text');
+assert(lashHubCta.includes('data-service="extensiones-pestanas"')&&/pelo a pelo y volumen/i.test(lashHubMessage),'The general extensions CTA must not preselect one technique');
+assert(lashes.includes('Lifting con tinte sobre pestaña natural; no son extensiones.</figcaption>'),'Identify the lifting photo beside the extensions CTAs');
 const lashGuide=fs.readFileSync(path.join(root,'guias/lifting-o-extensiones-pestanas.html'),'utf8');
 const lashGuideGraph=JSON.parse(lashGuide.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
 const guideTint=lashGuideGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Se puede combinar el lifting con tinte?').acceptedAnswer.text;
