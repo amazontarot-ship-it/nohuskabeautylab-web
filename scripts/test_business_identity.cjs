@@ -210,21 +210,21 @@ assert(gazePage.includes('No documentan una secuencia antes y después de una mi
 assert(!naturalSnippet.includes('Cómo organizar el cuidado después'),'Keep the confirmed care instructions in their FAQ, without repeating the old care block');
 const tintPage=fs.readFileSync(path.join(root,'tratamientos/tinte-hibrido-cejas-granollers.html'),'utf8');
 const tintGraph=JSON.parse(tintPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
-for(const [name,price] of [['Tinte híbrido de cejas en Granollers','35.00'],['Tinte de cejas solo en Granollers','25.00']]){
- const offer=tintGraph.find(v=>v['@type']==='Service'&&v.name===name).offers;
- assert.equal(offer.price,price);assert.equal(offer.priceCurrency,'EUR');
- const fragment=new URL(offer.url).hash.slice(1);if(fragment)assert(tintPage.includes('id="'+fragment+'"'));
-}
-const tintPrice=tintGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto cuesta el tinte de cejas solo?').acceptedAnswer.text;
-assert.equal(tintPage.match(/<summary>¿Cuánto cuesta el tinte de cejas solo\?<\/summary><p>([^]*?)<\/p>/)[1],tintPrice,'Visible and structured tint prices must agree');
-assert(tintPrice.includes('general cuesta 25 €')&&tintPrice.includes('híbrido cuesta 35 €')&&tintPrice.includes('Natural Brow cuesta 55 €')&&tintPrice.includes('ya incluye el tinte, sin suplemento'));
+const tintServices=tintGraph.filter(v=>v['@type']==='Service');
+assert.equal(tintServices.length,1,'Offer only hybrid eyebrow tint');
+assert.equal(tintServices[0].offers.price,'35.00');assert.equal(tintServices[0].offers.priceCurrency,'EUR');
+assert(tintServices[0].description.includes('visagismo')&&tintPage.includes('id="tinte-cejas-solo"'));
+for(const q of tintGraph.find(v=>v['@type']==='FAQPage').mainEntity)
+ assert(tintPage.includes('<summary>'+q.name+'</summary><p>'+q.acceptedAnswer.text+'</p>'),'Visible and structured tint FAQ must agree');
 const tintChoice=tintPage.match(/<section class="section" id="tinte-cejas-solo">([^]*?)<\/section>/)[1];
-assert(tintChoice.includes('tinte de cejas general cuesta 25 €')&&tintChoice.includes('tinte híbrido cuesta 35 €'));
-const tintMessage=new URL(tintChoice.match(/href="(https:\/\/wa.me\/[^"]+)"/)[1]).searchParams.get('text');
-assert(tintMessage.includes('tinte de cejas general por 25 euros'),'Generic tint WhatsApp must retain its confirmed 25 euro offer');
-const hybridMessage=new URL(tintPage.match(/data-service="tinte-hibrido-cejas"[^>]*href="([^"]+)"/)[1]).searchParams.get('text');
-assert(hybridMessage.includes('tinte híbrido de cejas'),'Hybrid tint WhatsApp must retain the distinct modality');
-assert(!tintPage.includes('tinte de cejas solo cuesta 35 €'),'Do not conflate general and hybrid tint prices');
+assert(tintChoice.includes('visagismo · 35 €')&&tintChoice.includes('laminado y tinte por 55 €'));
+for(const tag of tintPage.matchAll(/<a\b[^>]*href="(https:\/\/wa\.me\/[^"]+)"/g)){
+ const u=new URL(tag[1]);assert.equal(u.pathname,'/34624011715');
+ assert(u.searchParams.get('text').includes('tinte híbrido de cejas'),'Every tint message should request the real service');
+}
+for(const page of [tintPage,home,naturalSnippet,fs.readFileSync(path.join(root,'tratamientos/cejas-granollers.html'),'utf8')])
+ assert.doesNotMatch(page,/(?:tinte de cejas (?:solo|general)[^<>.]{0,40}25\s*€|tinte de cejas general por 25 euros)/i);
+assert.doesNotMatch(tintPage,/25(?:\.00|\s*€)|tinte de cejas general/i);
 assert(liftingPage.includes('<q>Me hice el lifting de pestañas + tinte. Me ha encantado</q> — Alba Castelló.'),'The lifting excerpt must remain a faithful attributed quotation, not an invented testimonial');
 assert(liftingPage.includes('href="https://share.google/avmiWneWwmrhqdJWC"')&&liftingPage.includes('es una opinión individual, no acredita el caso fotografiado ni garantiza un resultado'),'Keep the verified review source without implying the reviewer is the photographed client or guaranteeing a result');
 const homeBrowChoice=home.match(/<a class="seo-path" href="tratamientos\/micropigmentacion-cejas-granollers.html">([^]*?)<\/a>/)[1];
