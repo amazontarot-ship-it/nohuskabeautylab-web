@@ -8,6 +8,9 @@
   });
   function update() {
     var option = choice.options[choice.selectedIndex];
+    // En esta ficha solo la reserva lleva el precio de la técnica; la valoración es gratuita.
+    var priced = choice.dataset.pricedOptions !== undefined && option.textContent.match(/^(.+) · (\d+ €)$/);
+    var technique = priced ? priced[1] : option.textContent;
     links.forEach(function (original) {
       var link = original.link;
       // Un enlace de una técnica concreta no es parte del selector general.
@@ -26,11 +29,14 @@
       var keepMessage = link.dataset.keepMessage !== undefined;
       var selectedMessage = keepMessage
         ? message.split("\n\nReferencia: WEB-")[0] + "\nMe interesa: " + option.textContent + "."
-        : "Hola Nohuska, quiero " + request + option.textContent + " en Granollers.";
+        : "Hola Nohuska, quiero " + request + (original.intent === "appointment" ? option.textContent : technique) + " en Granollers.";
       url.searchParams.set("text", selectedMessage + suffix);
       link.href = url.toString();
       link.dataset.service = choice.value;
-      if (!keepMessage) link.textContent = original.intent === "appointment" ? "Solicitar cita de " + option.textContent : original.intent === "valuation" ? "Valoración gratuita: " + option.textContent : "Consultar " + option.textContent + " por WhatsApp";
+      if (keepMessage) return;
+      if (original.intent === "appointment") link.textContent = priced ? priced[2] + " · Reservar " + technique : "Solicitar cita de " + technique;
+      else if (original.intent === "valuation") link.textContent = "Valoración gratuita: " + technique;
+      else link.textContent = "Consultar " + technique + " por WhatsApp";
     });
   }
   var manualChoice = !!choice.value;

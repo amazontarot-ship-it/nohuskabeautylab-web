@@ -12,10 +12,17 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
   assert.match(html, /<label for="consultation-choice">/);
   assert.ok(html.indexOf("nohuska-conversiones.js") < html.indexOf("nohuska-recorrido.js"));
   const options = [...html.matchAll(/<option (?:id="([^"]+)" )?value="([^"]*)">([^<]*)<\/option>/g)].map(m => ({ id: m[1], value: m[2], textContent: m[3] }));
+  const priced = /<select\b[^>]*\bdata-priced-options\b/.test(html);
+  assert.equal(priced, file === "extensiones-pestanas-granollers.html");
   if (file === "extensiones-pestanas-granollers.html") {
-    for (const label of ["Relleno de extensiones · 35 €", "Retirada de extensiones · 15 €"]) {
-      assert.ok(options.some(option => option.textContent === label && option.value === "extensiones-pestanas"), "Maintenance choices must retain the existing extensions family");
-    }
+    assert.equal(options[0].value, ""); assert.doesNotMatch(options[0].textContent, /€/);
+    assert.deepEqual(options.slice(1).map(o => [o.value, o.textContent]), [
+      ["click-lash", "Click Lash · 35 €"], ["extensiones-pelo-a-pelo", "Extensiones pelo a pelo · 55 €"],
+      ["extensiones-volumen", "Extensiones de volumen · 55 €"], ["extensiones-pestanas", "Relleno de extensiones · 35 €"],
+      ["extensiones-pestanas", "Retirada de extensiones · 15 €"]
+    ]);
+    const hero = html.match(/<section class="hero">([\s\S]*?)<\/section>/)[1];
+    assert.match(hero, /<\/h1>[\s\S]*data-consultation-choice[\s\S]*data-contact-intent="appointment"[\s\S]*<img/);
   }
   for (const withReference of [false, true]) {
     const links = [...html.matchAll(/<a\b([^>]*href="https:\/\/wa.me\/34624011715[^>]+)>([^<]*)<\/a>/g)].map(m => {
@@ -33,14 +40,19 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
     if (file === "micropigmentacion-cejas-granollers.html") {
       for (const label of pmuActions) assert.equal(originals.filter(link => link.textContent === label).length, 1);
     }
-    if (file === "extensiones-pestanas-granollers.html") assert.ok(originals.some(link => link.textContent === "Consultar volumen y estilos"));
+    if (priced) {
+      assert.ok(originals.some(link => link.textContent === "Consultar volumen y estilos"));
+      const general = originals.filter(link => link.dataset.contactIntent === "appointment" && link.dataset.fixedConsultation === undefined);
+      assert.equal(general.length, 2);
+      for (const link of general) assert.doesNotMatch(link.textContent + new URL(link.href).searchParams.get("text"), /€/, "Do not quote a price before choosing a technique");
+    }
     const listeners = {};
-    const choice = { options, selectedIndex: 0, get value() { return options[this.selectedIndex].value; }, set value(v) { this.selectedIndex = options.findIndex(o => o.value === v); }, addEventListener: (name, fn) => { listeners[name] = fn; } };
-    const sections = new Map([...html.matchAll(/<(?:section|div)\b[^>]*id="([^"]+)"[^>]*data-consultation-value="([^"]+)"/g)].map(m => [m[1], { dataset: { consultationValue: m[2] } }]));
+    const choice = { options, dataset: priced ? { pricedOptions: "" } : {}, selectedIndex: 0, get value() { return options[this.selectedIndex].value; }, set value(v) { this.selectedIndex = options.findIndex(o => o.value === v); }, addEventListener: (name, fn) => { listeners[name] = fn; } };
+    const sections = new Map([...html.matchAll(/<(?:section|div|p)\b[^>]*id="([^"]+)"[^>]*data-consultation-value="([^"]+)"/g)].map(m => [m[1], { dataset: { consultationValue: m[2] } }]));
     const location = { hash: "" };
     const start = () => vm.runInNewContext(script, { URL, document: { querySelector: () => choice, querySelectorAll: () => links, getElementById: id => sections.get(id) }, window: { location, addEventListener: (name, fn) => { listeners[name] = fn; } } });
     if (file === "extensiones-pestanas-granollers.html") {
-      for (const [fragment, service] of [["pelo-a-pelo","extensiones-pelo-a-pelo"], ["volumen","extensiones-volumen"], ["click-lash","click-lash"], ["cuidados-extensiones",""]]) {
+      for (const [fragment, service] of [["pelo-a-pelo","extensiones-pelo-a-pelo"], ["volumen","extensiones-volumen"], ["click-lash","click-lash"], ["relleno","extensiones-pestanas"], ["cuidados-extensiones",""]]) {
         location.hash = "#" + fragment;
         start();
         assert.equal(choice.value, service, "Catalogue links must keep the technique, without guessing for care enquiries");
@@ -48,7 +60,9 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
           if (originals[i].dataset.service === "extensiones-volumen" || originals[i].dataset.fixedConsultation !== undefined) assert.deepEqual(link, originals[i]);
           else {
             const text = new URL(link.href).searchParams.get("text");
-            assert(text.includes(choice.options[choice.selectedIndex].textContent));
+            const label = choice.options[choice.selectedIndex].textContent;
+            if (fragment === "relleno") assert.equal(label, "Relleno de extensiones · 35 €");
+            assert(text.includes(link.dataset.contactIntent === "appointment" ? label : label.split(" · ")[0]));
             if (withReference) assert(text.endsWith("Referencia: WEB-" + service.toUpperCase() + "-GRANOLLERS-INSTAGRAM-SOCIAL"));
           }
         }
@@ -105,18 +119,31 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
           assert.deepEqual(link, originals[index], "Cada enlace fijo debe conservar su modalidad, mensaje y referencia");
           continue;
         }
-        assert.ok(url.searchParams.get("text").includes(options[i].textContent));
-        if (file === "micropigmentacion-cejas-granollers.html" && pmuActions.includes(originals[index].textContent)) {
+        if (priced) {
+          const [name, price] = options[i].textContent.split(" · ");
+          const message = url.searchParams.get("text").split("\n\nReferencia: WEB-")[0];
+          if (link.dataset.contactIntent === "appointment") {
+            assert.equal(link.textContent, price + " · Reservar " + name);
+            assert.equal(message, "Hola Nohuska, quiero solicitar cita para " + options[i].textContent + " en Granollers.");
+          } else if (link.dataset.contactIntent === "valuation") {
+            assert.equal(link.textContent, "Valoración gratuita: " + name);
+            assert.equal(message, "Hola Nohuska, quiero una valoración gratuita de " + name + " en Granollers.");
+          } else {
+            assert.equal(link.textContent, "Consultar " + name + " por WhatsApp");
+            assert.equal(message, "Hola Nohuska, quiero consultar " + name + " en Granollers.");
+          }
+        } else if (file === "micropigmentacion-cejas-granollers.html" && pmuActions.includes(originals[index].textContent)) {
           assert.equal(link.textContent, originals[index].textContent, "No sustituir la acción de fotografías o presupuesto por una consulta genérica");
           const originalText = new URL(originals[index].href).searchParams.get("text").split("\n\nReferencia: WEB-")[0];
           assert.equal(url.searchParams.get("text").split("\n\nReferencia: WEB-")[0], originalText + "\nMe interesa: " + options[i].textContent + ".");
         } else if (link.dataset.contactIntent === "valuation") {
-          assert.ok(url.searchParams.get("text").includes("una valoración gratuita de "));
+          assert.ok(url.searchParams.get("text").includes("una valoración gratuita de " + options[i].textContent));
           assert.equal(link.textContent, "Valoración gratuita: " + options[i].textContent);
         } else if (link.dataset.contactIntent === "appointment") {
-          assert.ok(url.searchParams.get("text").includes("solicitar cita para "));
+          assert.ok(url.searchParams.get("text").includes("solicitar cita para " + options[i].textContent));
           assert.equal(link.textContent, "Solicitar cita de " + options[i].textContent);
         } else {
+          assert.ok(url.searchParams.get("text").includes(options[i].textContent));
           assert.equal(link.textContent, "Consultar " + options[i].textContent + " por WhatsApp");
         }
         assert.equal(link.dataset.service, options[i].value);
