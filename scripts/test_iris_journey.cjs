@@ -11,7 +11,7 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
   const html = read("tratamientos/" + file);
   assert.match(html, /<label for="consultation-choice">/);
   assert.ok(html.indexOf("nohuska-conversiones.js") < html.indexOf("nohuska-recorrido.js"));
-  const options = [...html.matchAll(/<option value="([^"]*)">([^<]*)<\/option>/g)].map(m => ({ value: m[1], textContent: m[2] }));
+  const options = [...html.matchAll(/<option (?:id="([^"]+)" )?value="([^"]*)">([^<]*)<\/option>/g)].map(m => ({ id: m[1], value: m[2], textContent: m[3] }));
   if (file === "extensiones-pestanas-granollers.html") {
     for (const label of ["Relleno de extensiones · 35 €", "Retirada de extensiones · 15 €"]) {
       assert.ok(options.some(option => option.textContent === label && option.value === "extensiones-pestanas"), "Maintenance choices must retain the existing extensions family");
@@ -24,7 +24,8 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
       const url = new URL(m[1].match(/href="([^"]+)"/)[1]);
       if (withReference) url.searchParams.set("text", url.searchParams.get("text") + "\n\nReferencia: WEB-" + service.toUpperCase() + "-GRANOLLERS-INSTAGRAM-SOCIAL");
       const keepMessage = m[1].includes("data-keep-message") ? "" : undefined;
-      return { href: url.toString(), textContent: m[2], dataset: { service, contactIntent, keepMessage, ctaPosition: "conservada", source: "instagram-social" } };
+      const fixedConsultation = m[1].includes("data-fixed-consultation") ? "" : undefined;
+      return { href: url.toString(), textContent: m[2], dataset: { service, contactIntent, keepMessage, fixedConsultation, ctaPosition: "conservada", source: "instagram-social" } };
     });
     assert.ok(links.length >= 2);
     const originals = links.map(link => ({ ...link, dataset: { ...link.dataset } }));
@@ -35,7 +36,7 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
     if (file === "extensiones-pestanas-granollers.html") assert.ok(originals.some(link => link.textContent === "Consultar volumen y estilos"));
     const listeners = {};
     const choice = { options, selectedIndex: 0, get value() { return options[this.selectedIndex].value; }, set value(v) { this.selectedIndex = options.findIndex(o => o.value === v); }, addEventListener: (name, fn) => { listeners[name] = fn; } };
-    const sections = new Map([...html.matchAll(/<section\b[^>]*id="([^"]+)"[^>]*data-consultation-value="([^"]+)"/g)].map(m => [m[1], { dataset: { consultationValue: m[2] } }]));
+    const sections = new Map([...html.matchAll(/<(?:section|div)\b[^>]*id="([^"]+)"[^>]*data-consultation-value="([^"]+)"/g)].map(m => [m[1], { dataset: { consultationValue: m[2] } }]));
     const location = { hash: "" };
     const start = () => vm.runInNewContext(script, { URL, document: { querySelector: () => choice, querySelectorAll: () => links, getElementById: id => sections.get(id) }, window: { location, addEventListener: (name, fn) => { listeners[name] = fn; } } });
     if (file === "extensiones-pestanas-granollers.html") {
@@ -62,6 +63,24 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
       }
       location.hash = "";
     }
+    if (file === "micropigmentacion-cejas-granollers.html") {
+      for (const [hash,label] of [["#microblading","Microblading manual"], ["#nanoblading","Nanoblading manual"], ["#resultado-nanoblading","Nanoblading manual"]]) {
+        location.hash = hash; start();
+        assert.equal(options[choice.selectedIndex].textContent,label,"Keep the technique even when its reporting code is shared");
+        for (const [i,link] of links.entries()) {
+          const message = new URL(link.href).searchParams.get("text");
+          if (link.dataset.fixedConsultation !== undefined) { assert.deepEqual(link,originals[i]); assert(/valoración gratuita.*nanoblading/i.test(message)); continue; }
+          assert(message.includes(label) && link.dataset.service === "micropigmentacion-cejas");
+          if (originals[i].dataset.contactIntent === "appointment") assert(message.includes("solicitar cita"));
+          if (withReference) assert(message.endsWith("Referencia: WEB-MICROPIGMENTACION-CEJAS-GRANOLLERS-INSTAGRAM-SOCIAL"));
+        }
+        choice.selectedIndex = options.findIndex(o=>o.textContent==="Hair Stroke"); listeners.change();
+        location.hash = "#resultado-nanoblading"; listeners.hashchange(); listeners.pageshow();
+        assert.equal(options[choice.selectedIndex].textContent,"Hair Stroke");
+        choice.selectedIndex=0; listeners.change(); assert.deepEqual(links,originals);
+      }
+      location.hash="";
+    }
     start();
     for (let i = 1; i < options.length; i++) {
       choice.selectedIndex = i;
@@ -70,8 +89,8 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
       for (const [index, link] of links.entries()) {
         const url = new URL(link.href);
         assert.equal(url.origin + url.pathname, "https://wa.me/34624011715");
-        if (originals[index].textContent === "Consultar volumen y estilos") {
-          assert.deepEqual(link, originals[index], "El enlace de la sección de volumen debe conservar su modalidad, mensaje y referencia");
+        if (originals[index].textContent === "Consultar volumen y estilos" || originals[index].dataset.fixedConsultation !== undefined) {
+          assert.deepEqual(link, originals[index], "Cada enlace fijo debe conservar su modalidad, mensaje y referencia");
           continue;
         }
         assert.ok(url.searchParams.get("text").includes(options[i].textContent));
@@ -133,6 +152,13 @@ const browHero = browPage.match(/href="(https:\/\/wa.me\/[^\"]+)"/)[1];
 assert.match(new URL(browHero).searchParams.get("text"), /valoración gratuita de cejas.*microblading, nanoblading/);
 assert.doesNotMatch(browPage, /sin disponibilidad confirmada|sin confirmar su disponibilidad|sin dar por confirmada|no confirma que se realicen/);
 const browSchema = JSON.parse(browPage.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+assert(browPage.includes('data-fixed-consultation') && browPage.includes('Pedir valoración gratuita de nanoblading'));
+for (const [key,price] of [["microblading","297"],["nanoblading","297"]]) {
+  const service=browSchema["@graph"].find(n => n["@type"]==="Service" && n["@id"]?.endsWith("#"+key));
+  assert(service && service.offers.price === price+".00" && service.offers.priceCurrency==="EUR" && service.description.includes("repaso no incluido"));
+  assert(browPage.includes('id="'+key+'" data-consultation-value="opcion-'+key+'"><strong>') && browPage.includes(' '+price+' €</strong>'));
+}
+assert(read("tratamientos/micropigmentacion-granollers.html").includes('href="micropigmentacion-cejas-granollers.html#nanoblading"'));
 for (const technique of ["Microblading manual", "Nanoblading manual"]) {
   assert.ok(browPage.includes('value="micropigmentacion-cejas">' + technique + '</option>'));
   assert.ok(browSchema["@graph"].find(node => node["@type"] === "Service").serviceType.includes(technique));

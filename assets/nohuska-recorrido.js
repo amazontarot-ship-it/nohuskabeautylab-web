@@ -9,9 +9,9 @@
   function update() {
     var option = choice.options[choice.selectedIndex];
     links.forEach(function (original) {
-      // El enlace dentro de la sección de volumen no es parte del selector general.
-      if (original.service === "extensiones-volumen") return;
       var link = original.link;
+      // Un enlace de una técnica concreta no es parte del selector general.
+      if (original.service === "extensiones-volumen" || link.dataset.fixedConsultation !== undefined) return;
       if (!choice.value) {
         link.href = original.href;
         link.dataset.service = original.service;
@@ -38,7 +38,10 @@
     if (manualChoice || !window.location.hash) return;
     var target = document.getElementById(window.location.hash.slice(1));
     if (!target || !target.dataset.consultationValue) return;
-    choice.value = target.dataset.consultationValue;
+    var key = target.dataset.consultationValue;
+    var index = Array.from(choice.options).findIndex(function (opt) { return opt.id === key || opt.value === key; });
+    if (index === -1) return;
+    choice.selectedIndex = index;
     update();
   }
   choice.addEventListener("change", function () { manualChoice = true; update(); });
