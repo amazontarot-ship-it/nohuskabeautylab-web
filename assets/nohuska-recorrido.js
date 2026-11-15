@@ -23,10 +23,14 @@
       var reference = message.match(/\n\nReferencia: WEB-[^\n]+/);
       var suffix = reference ? reference[0].replace("WEB-" + original.service.toUpperCase() + "-", "WEB-" + choice.value.toUpperCase() + "-") : "";
       var request = original.intent === "appointment" ? "solicitar cita para " : original.intent === "valuation" ? "una valoración gratuita de " : "consultar ";
-      url.searchParams.set("text", "Hola Nohuska, quiero " + request + option.textContent + " en Granollers." + suffix);
+      var keepMessage = link.dataset.keepMessage !== undefined;
+      var selectedMessage = keepMessage
+        ? message.split("\n\nReferencia: WEB-")[0] + "\nMe interesa: " + option.textContent + "."
+        : "Hola Nohuska, quiero " + request + option.textContent + " en Granollers.";
+      url.searchParams.set("text", selectedMessage + suffix);
       link.href = url.toString();
       link.dataset.service = choice.value;
-      link.textContent = original.intent === "appointment" ? "Solicitar cita de " + option.textContent : original.intent === "valuation" ? "Valoración gratuita: " + option.textContent : "Consultar " + option.textContent + " por WhatsApp";
+      if (!keepMessage) link.textContent = original.intent === "appointment" ? "Solicitar cita de " + option.textContent : original.intent === "valuation" ? "Valoración gratuita: " + option.textContent : "Consultar " + option.textContent + " por WhatsApp";
     });
   }
   choice.addEventListener("change", update);

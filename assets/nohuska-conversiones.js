@@ -249,21 +249,24 @@
     var saved = getSessionValue("nohuska_source");
     var referrerHost = "";
     try {
-      referrerHost = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : "";
+      var referrer = document.referrer ? new URL(document.referrer) : null;
+      referrerHost = referrer ? referrer.hostname.toLowerCase() : "";
     } catch (error) {
       // Un referente inválido no interrumpe los enlaces de contacto.
     }
     var source = "directo-o-desconocido";
+    var googleHost = /^(?:(.+)\.)?google\.(?:com|es|cat|fr|de|it|pt|co\.uk)$/.exec(referrerHost);
 
     if (campaignSource) {
       source = allowedSources.indexOf(campaignSource) !== -1 ? campaignSource : "campana-otra";
       if (allowedMediums.indexOf(campaignMedium) !== -1) source += "-" + campaignMedium;
-    } else if (saved && (/^(google|instagram|facebook|booksy|chatgpt|gemini|perplexity|copilot|claude|bing|whatsapp|newsletter|internal-test|campana-otra)(-(organic|referral|social|email|cpc|paid-social|organico|qa))?$/.test(saved) || saved === "referencia-web" || saved === "directo-o-desconocido")) {
+    } else if (saved && (/^(google|instagram|facebook|booksy|chatgpt|gemini|perplexity|copilot|claude|bing|whatsapp|newsletter|internal-test|campana-otra)(-(organic|referral|social|email|cpc|paid-social|organico|qa))?$/.test(saved) || saved === "referencia-web" || saved === "directo-o-desconocido" || saved === "google-maps")) {
       source = saved;
     } else if (getAiSource(referrerHost)) {
       source = getAiSource(referrerHost);
-    } else if (/(^|\.)google\.(com|es|cat|fr|de|it|pt|co\.uk)$/.test(referrerHost)) {
-      source = "google-organico";
+    } else if (googleHost) {
+      var isMaps = googleHost[1] === "maps" || ((!googleHost[1] || googleHost[1] === "www") && /^\/maps(?:\/|$)/.test(referrer.pathname));
+      source = isMaps ? "google-maps" : "google-organico";
     } else if (/(^|\.)instagram\.com$/.test(referrerHost)) {
       source = "instagram";
     } else if (referrerHost && referrerHost !== window.location.hostname && !/^(www\.)?(nohuska\.com|nohuskabeautylab\.com)$/.test(referrerHost)) {

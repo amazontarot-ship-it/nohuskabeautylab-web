@@ -172,7 +172,13 @@ assert.equal(guideImage,lashGuide.match(/<meta property="og:image" content="([^"
 assert(lashGuide.includes('no son extensiones'),'Never present the existing lifting photo as an extensions result');
 assert(lashGuide.includes('data-service="lifting-pestanas" data-cta-position="cierre-guia-lifting"'),'The lifting CTA must not inherit extensions attribution from the guide filename');
 assert(lashGuide.includes('data-service="pestanas" data-cta-position="hero-guia-pestanas"'),'An undecided visitor must retain generic eyelash attribution');
-const naturalFaq=JSON.parse(naturalSnippet.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'].find(v=>v['@type']==='FAQPage');
+const naturalGraph=JSON.parse(naturalSnippet.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+const naturalFaq=naturalGraph.find(v=>v['@type']==='FAQPage');
+const naturalService=naturalGraph.find(v=>v['@type']==='Service');
+for(const component of ['Diseño de cejas','Tinte de cejas']){
+ assert(naturalService.serviceType.includes(component),'Natural Brow includes '+component);
+ assert(!naturalService.alternateName.includes(component+' Granollers'),'The package is not an alias for the standalone service: '+component);
+}
 for(const question of ['¿Qué incluye el laminado de cejas Natural Brow?','¿Qué diferencia hay entre Natural Brow™ y Korean Gaze™?','¿Cuánto cuesta el laminado de cejas con diseño y tinte?','¿Cuánto dura el resultado del laminado y del tinte?','¿Qué cuidados indicáis después de Natural Brow?']){
  const visible=[...naturalSnippet.matchAll(/<summary>([^]*?)<\/summary><p>([^]*?)<\/p>/g)].find(m=>m[1]===question);
  assert(visible,'Natural Brow must answer the commercial question '+question);
@@ -215,6 +221,7 @@ const tintPage=fs.readFileSync(path.join(root,'tratamientos/tinte-hibrido-cejas-
 const tintGraph=JSON.parse(tintPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
 const tintServices=tintGraph.filter(v=>v['@type']==='Service');
 assert.equal(tintServices.length,1,'Offer only hybrid eyebrow tint');
+assert(tintServices[0].alternateName.includes('Tinte de cejas Granollers'),'Keep standalone tint on its own offer');
 assert.equal(tintServices[0].offers.price,'35.00');assert.equal(tintServices[0].offers.priceCurrency,'EUR');
 assert(tintServices[0].description.includes('visagismo')&&tintPage.includes('id="tinte-cejas-solo"'));
 for(const q of tintGraph.find(v=>v['@type']==='FAQPage').mainEntity)

@@ -91,6 +91,7 @@ function createPage(options = {}) {
 
 const granted = createPage({
   consent: "granted",
+  referrer: "https://maps.google.com/",
   url: "https://nohuska.com/tratamientos/lifting-pestanas-granollers.html?utm_source=google&utm_medium=organic&utm_campaign=perfil_empresa_granollers"
 });
 [granted.wa, granted.phone, granted.booksy, granted.maps].forEach(link => link.click());
@@ -179,6 +180,28 @@ assert.equal(naturalBrow.events()[0][2].service, "nohuska-brow", "Keep historica
 const spoofed = createPage({ consent: "granted", referrer: "https://google.es.attacker.example/?instagram.com" });
 spoofed.wa.click();
 assert.equal(spoofed.events()[0][2].source, "referencia-web");
+for (const [referrer, expected] of [
+  ["https://maps.google.com/", "google-maps"],
+  ["https://www.google.es/maps/place/visita-privada?dato=privado", "google-maps"],
+  ["https://www.google.com/", "google-organico"],
+  ["https://www.google.es/search?q=maps", "google-organico"],
+  ["https://www.google.com/maps-extra", "google-organico"],
+  ["https://maps.google.com.example.org/maps", "referencia-web"]
+]) {
+  const page = createPage({ consent: "granted", referrer });
+  page.wa.click();
+  const message = new URL(page.wa.href).searchParams.get("text");
+  assert.equal(page.events()[0][2].source, expected, referrer);
+  assert.equal(page.events()[0][2].campaign, "sin-campana", "A Maps referrer does not prove a Business Profile campaign");
+  assert.ok(message.endsWith("-" + expected.toUpperCase()));
+  assert.doesNotMatch(message + JSON.stringify(page.window.dataLayer), /visita-privada|dato=privado/);
+  const next = createPage({ consent: "granted", referrer: "https://nohuska.com/", session: page.window.sessionStorage.values });
+  assert.equal(next.wa.dataset.source, expected);
+}
+const mapsOptOut = createPage({ consent: "denied", referrer: "https://maps.google.com/" });
+mapsOptOut.wa.click();
+assert.equal(mapsOptOut.events().length, 0);
+assert.equal(mapsOptOut.window.sessionStorage.writes, 0);
 const existingReference = createPage({ message: "Hola\n\nReferencia: WEB-CAPILAR-HERO", consent: "granted" });
 assert.equal((new URL(existingReference.wa.href).searchParams.get("text").match(/Referencia:/g) || []).length, 1);
 const qa = createPage({ consent: "granted", url: "https://nohuska.com/?utm_source=internal-test&utm_medium=qa&utm_campaign=whatsapp-qa-20261022" });

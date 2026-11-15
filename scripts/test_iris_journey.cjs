@@ -23,10 +23,15 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
       const contactIntent = m[1].match(/data-contact-intent="([^"]+)"/)?.[1];
       const url = new URL(m[1].match(/href="([^"]+)"/)[1]);
       if (withReference) url.searchParams.set("text", url.searchParams.get("text") + "\n\nReferencia: WEB-" + service.toUpperCase() + "-GRANOLLERS-INSTAGRAM-SOCIAL");
-      return { href: url.toString(), textContent: m[2], dataset: { service, contactIntent, ctaPosition: "conservada", source: "instagram-social" } };
+      const keepMessage = m[1].includes("data-keep-message") ? "" : undefined;
+      return { href: url.toString(), textContent: m[2], dataset: { service, contactIntent, keepMessage, ctaPosition: "conservada", source: "instagram-social" } };
     });
     assert.ok(links.length >= 2);
     const originals = links.map(link => ({ ...link, dataset: { ...link.dataset } }));
+    const pmuActions = ["Enviar mis fotografías", "Solicitar valoración"];
+    if (file === "micropigmentacion-cejas-granollers.html") {
+      for (const label of pmuActions) assert.equal(originals.filter(link => link.textContent === label).length, 1);
+    }
     if (file === "extensiones-pestanas-granollers.html") assert.ok(originals.some(link => link.textContent === "Consultar volumen y estilos"));
     const listeners = {};
     const choice = { options, selectedIndex: 0, get value() { return options[this.selectedIndex].value; }, addEventListener: (name, fn) => { listeners[name] = fn; } };
@@ -43,7 +48,11 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
           continue;
         }
         assert.ok(url.searchParams.get("text").includes(options[i].textContent));
-        if (link.dataset.contactIntent === "valuation") {
+        if (file === "micropigmentacion-cejas-granollers.html" && pmuActions.includes(originals[index].textContent)) {
+          assert.equal(link.textContent, originals[index].textContent, "No sustituir la acción de fotografías o presupuesto por una consulta genérica");
+          const originalText = new URL(originals[index].href).searchParams.get("text").split("\n\nReferencia: WEB-")[0];
+          assert.equal(url.searchParams.get("text").split("\n\nReferencia: WEB-")[0], originalText + "\nMe interesa: " + options[i].textContent + ".");
+        } else if (link.dataset.contactIntent === "valuation") {
           assert.ok(url.searchParams.get("text").includes("una valoración gratuita de "));
           assert.equal(link.textContent, "Valoración gratuita: " + options[i].textContent);
         } else if (link.dataset.contactIntent === "appointment") {
