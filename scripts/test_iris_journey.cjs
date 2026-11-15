@@ -13,16 +13,24 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
   assert.ok(html.indexOf("nohuska-conversiones.js") < html.indexOf("nohuska-recorrido.js"));
   const options = [...html.matchAll(/<option (?:id="([^"]+)" )?value="([^"]*)">([^<]*)<\/option>/g)].map(m => ({ id: m[1], value: m[2], textContent: m[3] }));
   const priced = /<select\b[^>]*\bdata-priced-options\b/.test(html);
-  assert.equal(priced, file === "extensiones-pestanas-granollers.html");
-  if (file === "extensiones-pestanas-granollers.html") {
+  const pmu = file === "micropigmentacion-cejas-granollers.html";
+  assert.equal(priced, pmu || file === "extensiones-pestanas-granollers.html");
+  if (priced) {
     assert.equal(options[0].value, ""); assert.doesNotMatch(options[0].textContent, /€/);
+    const hero = html.match(/<section class="hero">([\s\S]*?)<\/section>/)[1];
+    assert.match(hero, /<\/h1>[\s\S]*data-consultation-choice[\s\S]*data-contact-intent="appointment"[\s\S]*<img/);
+  }
+  if (file === "extensiones-pestanas-granollers.html") {
     assert.deepEqual(options.slice(1).map(o => [o.value, o.textContent]), [
       ["click-lash", "Click Lash · 35 €"], ["extensiones-pelo-a-pelo", "Extensiones pelo a pelo · 55 €"],
       ["extensiones-volumen", "Extensiones de volumen · 55 €"], ["extensiones-pestanas", "Relleno de extensiones · 35 €"],
       ["extensiones-pestanas", "Retirada de extensiones · 15 €"]
     ]);
-    const hero = html.match(/<section class="hero">([\s\S]*?)<\/section>/)[1];
-    assert.match(hero, /<\/h1>[\s\S]*data-consultation-choice[\s\S]*data-contact-intent="appointment"[\s\S]*<img/);
+  } else if (pmu) {
+    assert.deepEqual(options.slice(1).map(o => o.textContent).sort(), [
+      "Micropigmentación de cejas · 230 €", "Microblading manual · 297 €", "Nanoblading manual · 297 €",
+      "Corrección de un trabajo antiguo · A valorar", "Hair Stroke · A valorar", "Powder Brows · A valorar"
+    ].sort());
   }
   for (const withReference of [false, true]) {
     const links = [...html.matchAll(/<a\b([^>]*href="https:\/\/wa.me\/34624011715[^>]+)>([^<]*)<\/a>/g)].map(m => {
@@ -37,11 +45,11 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
     assert.ok(links.length >= 2);
     const originals = links.map(link => ({ ...link, dataset: { ...link.dataset } }));
     const pmuActions = ["Enviar mis fotografías", "Solicitar valoración"];
-    if (file === "micropigmentacion-cejas-granollers.html") {
+    if (pmu) {
       for (const label of pmuActions) assert.equal(originals.filter(link => link.textContent === label).length, 1);
     }
     if (priced) {
-      assert.ok(originals.some(link => link.textContent === "Consultar volumen y estilos"));
+      if (!pmu) assert.ok(originals.some(link => link.textContent === "Consultar volumen y estilos"));
       const general = originals.filter(link => link.dataset.contactIntent === "appointment" && link.dataset.fixedConsultation === undefined);
       assert.equal(general.length, 2);
       for (const link of general) assert.doesNotMatch(link.textContent + new URL(link.href).searchParams.get("text"), /€/, "Do not quote a price before choosing a technique");
@@ -89,23 +97,31 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
       }
       location.hash="";
     }
-    if (file === "micropigmentacion-cejas-granollers.html") {
-      for (const [hash,label] of [["#microblading","Microblading manual"], ["#nanoblading","Nanoblading manual"], ["#resultado-nanoblading","Nanoblading manual"], ["#hair-stroke","Hair Stroke"]]) {
+    if (pmu) {
+      for (const [hash,label] of [["#microblading","Microblading manual"], ["#nanoblading","Nanoblading manual"], ["#resultado-nanoblading","Nanoblading manual"], ["#hair-stroke","Hair Stroke"], ["#correccion","Corrección de un trabajo antiguo"]]) {
         location.hash = hash; start();
-        assert.equal(options[choice.selectedIndex].textContent,label,"Keep the technique even when its reporting code is shared");
+        const [name, price] = options[choice.selectedIndex].textContent.split(" · ");
+        assert.equal(name,label,"Keep the technique even when its reporting code is shared");
         for (const [i,link] of links.entries()) {
           const message = new URL(link.href).searchParams.get("text");
           if (link.dataset.fixedConsultation !== undefined) { assert.deepEqual(link,originals[i]); assert(/valoración gratuita.*nanoblading/i.test(message)); continue; }
           assert(message.includes(label) && link.dataset.service === "micropigmentacion-cejas");
-          if (originals[i].dataset.contactIntent === "appointment") assert(message.includes("solicitar cita"));
+          if (originals[i].dataset.contactIntent === "appointment") assert(message.includes(price === "A valorar" ? "presupuesto" : "solicitar cita"));
           if (withReference) assert(message.endsWith("Referencia: WEB-MICROPIGMENTACION-CEJAS-GRANOLLERS-INSTAGRAM-SOCIAL"));
         }
-        choice.selectedIndex = options.findIndex(o=>o.textContent==="Hair Stroke"); listeners.change();
+        choice.selectedIndex = options.findIndex(o=>o.textContent.startsWith("Hair Stroke · ")); listeners.change();
         location.hash = "#resultado-nanoblading"; listeners.hashchange(); listeners.pageshow();
-        assert.equal(options[choice.selectedIndex].textContent,"Hair Stroke");
+        assert.match(options[choice.selectedIndex].textContent,/^Hair Stroke · /);
         choice.selectedIndex=0; listeners.change(); assert.deepEqual(links,originals);
       }
       location.hash="";
+      start();
+      for (const [label,intent] of [["Corrección de un trabajo antiguo","quote"],["Nanoblading manual","appointment"]]) {
+        choice.selectedIndex = options.findIndex(o=>o.textContent.startsWith(label+" · "));
+        listeners.change(); listeners.pageshow();
+        for (const [i,link] of links.entries()) if (originals[i].dataset.contactIntent === "appointment") assert.equal(link.dataset.contactIntent,intent);
+      }
+      choice.selectedIndex=0; listeners.change(); assert.deepEqual(links,originals);
     }
     start();
     for (let i = 1; i < options.length; i++) {
@@ -122,20 +138,27 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
         if (priced) {
           const [name, price] = options[i].textContent.split(" · ");
           const message = url.searchParams.get("text").split("\n\nReferencia: WEB-")[0];
-          if (link.dataset.contactIntent === "appointment") {
+          const original = originals[index];
+          if (original.dataset.keepMessage !== undefined) {
+            assert(pmuActions.includes(original.textContent));
+            assert.equal(link.textContent, original.textContent, "Preserve the action to send photographs or request a quote");
+            assert.equal(message, new URL(original.href).searchParams.get("text").split("\n\nReferencia: WEB-")[0] + "\nMe interesa: " + name + ".");
+          } else if (original.dataset.contactIntent === "appointment" && price === "A valorar") {
+            assert.equal(link.dataset.contactIntent, "quote");
+            assert.equal(link.textContent, "Pedir presupuesto tras valoración");
+            assert.equal(message, "Hola Nohuska, quiero una valoración gratuita de " + name + " en Granollers para conocer mi presupuesto.");
+          } else if (original.dataset.contactIntent === "appointment") {
+            assert.equal(link.dataset.contactIntent, "appointment");
             assert.equal(link.textContent, price + " · Reservar " + name);
             assert.equal(message, "Hola Nohuska, quiero solicitar cita para " + options[i].textContent + " en Granollers.");
-          } else if (link.dataset.contactIntent === "valuation") {
+          } else if (original.dataset.contactIntent === "valuation") {
+            assert.equal(link.dataset.contactIntent, "valuation");
             assert.equal(link.textContent, "Valoración gratuita: " + name);
             assert.equal(message, "Hola Nohuska, quiero una valoración gratuita de " + name + " en Granollers.");
           } else {
             assert.equal(link.textContent, "Consultar " + name + " por WhatsApp");
             assert.equal(message, "Hola Nohuska, quiero consultar " + name + " en Granollers.");
           }
-        } else if (file === "micropigmentacion-cejas-granollers.html" && pmuActions.includes(originals[index].textContent)) {
-          assert.equal(link.textContent, originals[index].textContent, "No sustituir la acción de fotografías o presupuesto por una consulta genérica");
-          const originalText = new URL(originals[index].href).searchParams.get("text").split("\n\nReferencia: WEB-")[0];
-          assert.equal(url.searchParams.get("text").split("\n\nReferencia: WEB-")[0], originalText + "\nMe interesa: " + options[i].textContent + ".");
         } else if (link.dataset.contactIntent === "valuation") {
           assert.ok(url.searchParams.get("text").includes("una valoración gratuita de " + options[i].textContent));
           assert.equal(link.textContent, "Valoración gratuita: " + options[i].textContent);
@@ -200,7 +223,7 @@ const lashes = read("tratamientos/pestanas-granollers.html");
 assert.match(lashes, /data-service="extensiones-pestanas" data-cta-position="hero-extensiones"/);
 assert.match(lashes, /data-service="pestanas" data-cta-position="alternativa-pestanas"/);
 const browPage = read("tratamientos/micropigmentacion-cejas-granollers.html");
-const browHero = browPage.match(/href="(https:\/\/wa.me\/[^\"]+)"/)[1];
+const browHero = pmuHero.match(/data-cta-position="hero-micropigmentacion-cejas-granollers-valoracion"[^>]*href="([^"]+)"/)[1];
 assert.match(new URL(browHero).searchParams.get("text"), /valoración gratuita de cejas.*microblading, nanoblading/);
 assert.doesNotMatch(browPage, /sin disponibilidad confirmada|sin confirmar su disponibilidad|sin dar por confirmada|no confirma que se realicen/);
 const browSchema = JSON.parse(browPage.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
@@ -212,7 +235,7 @@ for (const [key,price] of [["microblading","297"],["nanoblading","297"]]) {
 }
 assert(read("tratamientos/micropigmentacion-granollers.html").includes('href="micropigmentacion-cejas-granollers.html#nanoblading"'));
 for (const technique of ["Microblading manual", "Nanoblading manual"]) {
-  assert.ok(browPage.includes('value="micropigmentacion-cejas">' + technique + '</option>'));
+  assert.ok(browPage.includes('value="micropigmentacion-cejas">' + technique + ' · 297 €</option>'));
   assert.ok(browSchema["@graph"].find(node => node["@type"] === "Service").serviceType.includes(technique));
 }
 assert.ok(home.includes('data-service="tinte-cejas"'));

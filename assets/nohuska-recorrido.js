@@ -8,13 +8,15 @@
   });
   function update() {
     var option = choice.options[choice.selectedIndex];
-    // En esta ficha solo la reserva lleva el precio de la técnica; la valoración es gratuita.
-    var priced = choice.dataset.pricedOptions !== undefined && option.textContent.match(/^(.+) · (\d+ €)$/);
-    var technique = priced ? priced[1] : option.textContent;
+    // La valoración no lleva tarifa. Un trabajo a valorar tampoco ofrece cita de tratamiento.
+    var terms = choice.dataset.pricedOptions !== undefined && option.textContent.match(/^(.+) · (\d+ €|A valorar)$/);
+    var technique = terms ? terms[1] : option.textContent;
+    var quoteOnly = terms && terms[2] === "A valorar";
     links.forEach(function (original) {
       var link = original.link;
       // Un enlace de una técnica concreta no es parte del selector general.
       if (original.service === "extensiones-volumen" || link.dataset.fixedConsultation !== undefined) return;
+      if (original.intent === "appointment") link.dataset.contactIntent = quoteOnly ? "quote" : "appointment";
       if (!choice.value) {
         link.href = original.href;
         link.dataset.service = original.service;
@@ -28,13 +30,15 @@
       var request = original.intent === "appointment" ? "solicitar cita para " : original.intent === "valuation" ? "una valoración gratuita de " : "consultar ";
       var keepMessage = link.dataset.keepMessage !== undefined;
       var selectedMessage = keepMessage
-        ? message.split("\n\nReferencia: WEB-")[0] + "\nMe interesa: " + option.textContent + "."
+        ? message.split("\n\nReferencia: WEB-")[0] + "\nMe interesa: " + technique + "."
         : "Hola Nohuska, quiero " + request + (original.intent === "appointment" ? option.textContent : technique) + " en Granollers.";
+      if (link.dataset.contactIntent === "quote") selectedMessage = "Hola Nohuska, quiero una valoración gratuita de " + technique + " en Granollers para conocer mi presupuesto.";
       url.searchParams.set("text", selectedMessage + suffix);
       link.href = url.toString();
       link.dataset.service = choice.value;
       if (keepMessage) return;
-      if (original.intent === "appointment") link.textContent = priced ? priced[2] + " · Reservar " + technique : "Solicitar cita de " + technique;
+      if (link.dataset.contactIntent === "quote") link.textContent = "Pedir presupuesto tras valoración";
+      else if (original.intent === "appointment") link.textContent = terms ? terms[2] + " · Reservar " + technique : "Solicitar cita de " + technique;
       else if (original.intent === "valuation") link.textContent = "Valoración gratuita: " + technique;
       else link.textContent = "Consultar " + technique + " por WhatsApp";
     });
