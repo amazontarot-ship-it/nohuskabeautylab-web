@@ -39,6 +39,9 @@ assert(priceAnswer.includes('El microblading manual tiene una tarifa de referenc
 assert(priceAnswer.includes('Ninguno de los dos tratamientos incluye retoque'));
 const menu=fs.readFileSync(path.join(root,'tratamientos/guia-tratamientos-nohuska.html'),'utf8');
 assert(menu.includes('Nanoblading: 297 €, retoque no incluido'));
+const browCards=(menu.match(/<article\b[^>]*>[\s\S]*?<\/article>/g)||[]).filter(card=>card.includes('href="nohuska-natural-brow-granollers.html"'));
+assert.equal(browCards.length,1,'The guide must not sell laminating and Natural Brow as separate appointments');
+for(const detail of ['id="laminado-cejas"','id="experiencia-brow"','55 €','1 hora'])assert(browCards[0].includes(detail),'Keep both incoming anchors and the confirmed offer');
 const llms=fs.readFileSync(path.join(root,'llms.txt'),'utf8');
 assert(llms.includes('Microblading 350 € y nanoblading 297 € de referencia (retoque no incluido)'));
 const barcelona=fs.readFileSync(path.join(root,'tratamientos/micropigmentacion-cejas-barcelona.html'),'utf8');
@@ -190,6 +193,8 @@ const naturalDuration=naturalFaq.mainEntity.find(v=>v.name==='¿Cuánto dura el 
 assert(naturalDuration.includes('5–6 semanas')&&naturalDuration.includes('tinte sobre la piel')&&naturalDuration.includes('7–9 días')&&naturalDuration.includes('no describe su duración sobre el pelo'));
 assert(naturalFaq.mainEntity.find(v=>v.name==='¿Qué cuidados indicáis después de Natural Brow?').acceptedAnswer.text.includes('primeras 48 horas'));
 const naturalChoice=naturalSnippet.match(/<section[^>]*aria-labelledby="elegir-natural-brow"[^>]*>([^]*?)<\/section>/)[1];
+const browAdvice=new URL(naturalChoice.match(/href="(https:\/\/wa\.me\/[^"]+)"/)[1]);
+assert(browAdvice.pathname==='/34624011715' && /valoración gratuita/i.test(browAdvice.searchParams.get('text')) && /laminado/i.test(browAdvice.searchParams.get('text')) && !/micropigmentación/i.test(browAdvice.searchParams.get('text')),'Brow advice must not assume the client requested PMU');
 assert(naturalChoice.includes('<caption>Qué opción valorar según tu objetivo</caption>'));
 assert.equal([...naturalChoice.matchAll(/<th scope="row">/g)].length,4,'Keep the four customer goals distinct, without inventing separate laminating offers');
 for(const offer of ['Natural Brow™ · 55 € · aprox. 1 hora','Korean Gaze™ · 85 € · aprox. 90 minutos'])assert(naturalChoice.includes(offer),'Choice table must show the confirmed package scope and appointment time');
