@@ -11,6 +11,9 @@ const reviewUrl='https://g.page/r/CbhT2P__bcl1EBM/review';
 const walk=(v,fn)=>{if(Array.isArray(v))v.forEach(x=>walk(x,fn));else if(v&&typeof v==='object'){fn(v);Object.values(v).forEach(x=>walk(x,fn));}};
 let files=0,mapsLinks=0;
 for(const dir of directories){for(const name of fs.readdirSync(path.join(root,dir))){if(!name.endsWith('.html'))continue;const file=path.join(dir,name),html=fs.readFileSync(path.join(root,file),'utf8');files++;
+ for(const [,url] of html.matchAll(/href="(https:\/\/wa\.me\/[^"]+)"/g)){
+   assert.doesNotMatch(new URL(url.replaceAll('&amp;','&')).searchParams.get('text')||'',/os he encontrado en google/i,file+': un mensaje de reserva no debe inventar la procedencia');
+ }
  assert(!/nuodermoestetica|Nuo Dermo|Plaça de la Porxada|931\s*41\s*48\s*60/i.test(html),file+' foreign business identity');
  // The owner has not authorized publishing a replacement opening schedule.
  assert(!/openingHoursSpecification|horario habitual.{0,20}lunes a sábado/i.test(html),file+' unapproved opening hours');
