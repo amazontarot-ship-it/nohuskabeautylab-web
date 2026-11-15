@@ -34,8 +34,35 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
     }
     if (file === "extensiones-pestanas-granollers.html") assert.ok(originals.some(link => link.textContent === "Consultar volumen y estilos"));
     const listeners = {};
-    const choice = { options, selectedIndex: 0, get value() { return options[this.selectedIndex].value; }, addEventListener: (name, fn) => { listeners[name] = fn; } };
-    vm.runInNewContext(script, { URL, document: { querySelector: () => choice, querySelectorAll: () => links }, window: { addEventListener: (name, fn) => { listeners[name] = fn; } } });
+    const choice = { options, selectedIndex: 0, get value() { return options[this.selectedIndex].value; }, set value(v) { this.selectedIndex = options.findIndex(o => o.value === v); }, addEventListener: (name, fn) => { listeners[name] = fn; } };
+    const sections = new Map([...html.matchAll(/<section\b[^>]*id="([^"]+)"[^>]*data-consultation-value="([^"]+)"/g)].map(m => [m[1], { dataset: { consultationValue: m[2] } }]));
+    const location = { hash: "" };
+    const start = () => vm.runInNewContext(script, { URL, document: { querySelector: () => choice, querySelectorAll: () => links, getElementById: id => sections.get(id) }, window: { location, addEventListener: (name, fn) => { listeners[name] = fn; } } });
+    if (file === "extensiones-pestanas-granollers.html") {
+      for (const [fragment, service] of [["pelo-a-pelo","extensiones-pelo-a-pelo"], ["volumen","extensiones-volumen"], ["click-lash","click-lash"], ["cuidados-extensiones",""]]) {
+        location.hash = "#" + fragment;
+        start();
+        assert.equal(choice.value, service, "Catalogue links must keep the technique, without guessing for care enquiries");
+        if (service) for (const [i, link] of links.entries()) {
+          if (originals[i].dataset.service === "extensiones-volumen") assert.deepEqual(link, originals[i]);
+          else {
+            const text = new URL(link.href).searchParams.get("text");
+            assert(text.includes(choice.options[choice.selectedIndex].textContent));
+            if (withReference) assert(text.endsWith("Referencia: WEB-" + service.toUpperCase() + "-GRANOLLERS-INSTAGRAM-SOCIAL"));
+          }
+        }
+        location.hash = "#volumen"; listeners.hashchange();
+        assert.equal(choice.value, "extensiones-volumen");
+        choice.value = "click-lash"; listeners.change();
+        location.hash = "#pelo-a-pelo"; listeners.hashchange(); listeners.pageshow();
+        assert.equal(choice.value, "click-lash", "A manual choice wins over a section visited afterwards");
+        choice.selectedIndex = 0; listeners.change();
+        location.hash = "#volumen"; listeners.hashchange(); listeners.pageshow();
+        assert.deepEqual(links, originals, "Browsing a section must not override an explicit request for general advice");
+      }
+      location.hash = "";
+    }
+    start();
     for (let i = 1; i < options.length; i++) {
       choice.selectedIndex = i;
       listeners.change();
@@ -73,6 +100,10 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
     assert.deepEqual(links, originals);
   }
 }
+const lashGuide = read("guias/lifting-o-extensiones-pestanas.html");
+const lashClosing = lashGuide.match(/<section class="cta">([\s\S]*?)<\/section>/)[1];
+assert(lashClosing.includes('href="../tratamientos/extensiones-pestanas-granollers.html"') && lashClosing.includes('>Consultar lifting con tinte</a>'), "Offer extensions without relabelling a lifting enquiry");
+assert(new URL(lashGuide.match(/class="mobile-contact"[^>]*href="([^"]+)"/)[1]).searchParams.get("text").includes("volumen"));
 const home = read("index.html");
 for (const treatment of ["Laminado de cejas", "Tinte de pestañas", "Lifting de pestañas con tinte", "Click Lash", "Extensiones de pestañas pelo a pelo"]) {
   assert.ok(home.includes("Consultar " + treatment + " por WhatsApp"));

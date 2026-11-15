@@ -33,7 +33,17 @@
       if (!keepMessage) link.textContent = original.intent === "appointment" ? "Solicitar cita de " + option.textContent : original.intent === "valuation" ? "Valoración gratuita: " + option.textContent : "Consultar " + option.textContent + " por WhatsApp";
     });
   }
-  choice.addEventListener("change", update);
+  var manualChoice = !!choice.value;
+  function followSection() {
+    if (manualChoice || !window.location.hash) return;
+    var target = document.getElementById(window.location.hash.slice(1));
+    if (!target || !target.dataset.consultationValue) return;
+    choice.value = target.dataset.consultationValue;
+    update();
+  }
+  choice.addEventListener("change", function () { manualChoice = true; update(); });
+  window.addEventListener("hashchange", followSection);
   window.addEventListener("pageshow", update);
   update();
+  followSection();
 })();
