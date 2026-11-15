@@ -31,7 +31,8 @@ const brow=fs.readFileSync(path.join(root,'tratamientos/micropigmentacion-cejas-
 const browGraph=JSON.parse(brow.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
 const nano=browGraph.find(v=>v['@id']==='https://nohuska.com/tratamientos/micropigmentacion-cejas-granollers.html#nanoblading');
 assert.equal(nano.serviceType,'Nanoblading manual');assert.equal(nano.offers.price,'297.00');assert.equal(nano.offers.priceCurrency,'EUR');
-assert(brow.includes('id="nanoblading"'));
+assert(brow.includes('id="nanoblading"'));assert(nano.image.endsWith('/nanoblading-cejas-antes-despues-nohuska.jpg'));
+const hair=browGraph.find(v=>v['@id']?.endsWith('#hair-stroke'));assert.equal(hair.provider['@id'],'https://nohuska.com/#business');assert(brow.includes('id="hair-stroke"'));
 const priceAnswer=browGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto cuesta la micropigmentación de cejas?').acceptedAnswer.text;
 const visiblePrice=brow.match(/<summary>¿Cuánto cuesta la micropigmentación de cejas\?<\/summary><p>([^]*?)<\/p>/)[1].replace(/<[^>]+>/g,'');
 assert.equal(visiblePrice,priceAnswer,'Visible and structured brow prices must agree');
@@ -40,8 +41,8 @@ assert(priceAnswer.includes('corregir una micropigmentación antigua, el precio 
 const menu=fs.readFileSync(path.join(root,'tratamientos/guia-tratamientos-nohuska.html'),'utf8');
 assert(menu.includes('Micropigmentación de cejas: 230 €') && menu.includes('Microblading y nanoblading manuales: 297 € cada uno, sin repaso'));
 const browCards=(menu.match(/<article\b[^>]*>[\s\S]*?<\/article>/g)||[]).filter(card=>card.includes('href="nohuska-natural-brow-granollers.html"'));
-assert.equal(browCards.length,1,'The guide must not sell laminating and Natural Brow as separate appointments');
-for(const detail of ['id="laminado-cejas"','id="experiencia-brow"','55 €','1 hora'])assert(browCards[0].includes(detail),'Keep both incoming anchors and the confirmed offer');
+assert.equal(browCards.length,1,'Keep the comparison on one card linking the same canonical page');
+for(const detail of ['id="laminado-cejas"','id="experiencia-brow"','45 €','55 €','1 hora'])assert(browCards[0].includes(detail),'Keep both incoming anchors and the confirmed offer');
 const llms=fs.readFileSync(path.join(root,'llms.txt'),'utf8');
 assert(llms.includes('Micropigmentación de cejas: 230 €') && llms.includes('Microblading y nanoblading manuales: 297 € cada uno, sin repaso incluido') && llms.includes('correcciones de trabajos antiguos se presupuestan tras valoración'));
 const barcelona=fs.readFileSync(path.join(root,'tratamientos/micropigmentacion-cejas-barcelona.html'),'utf8');
@@ -85,14 +86,14 @@ for(const file of ['micropigmentacion-cejas-barcelona.html','cejas-valles-orient
 const comarca=fs.readFileSync(path.join(root,'tratamientos/micropigmentacion-valles-oriental.html'),'utf8');
 assert(comarca.includes('href="micropigmentacion-cejas-granollers.html"'));
 assert(!comarca.match(/<meta name="description"[^>]+>/)[0].includes('Natural Brow'),'Natural Brow is not micropigmentation');
-assert(menu.includes('285 €') && menu.includes('Pelo a pelo o volumen: 55 €') && /Click Lash: 35 €<\/strong>, en unos 30 minutos/.test(menu) && menu.includes('El relleno de extensiones cuesta 35 €'));
-assert(llms.includes('pelo a pelo 55 €, volumen 55 €')&&llms.includes('relleno 35 €, retirada 15 €, Click Lash 35 €'));
+assert(menu.includes('285 €') && menu.includes('Primera puesta: 55 €') && menu.includes('cualquier efecto, forma o volumen') && /Click Lash: 35 €<\/strong>, en unos 30 minutos/.test(menu) && menu.includes('El relleno de extensiones cuesta 35 €'));
+assert(llms.includes('primera puesta 55 € para cualquier efecto, forma y volumen') && llms.includes('relleno 35 €, retirada 15 €. Click Lash™: 35 €'));
 const extensions=fs.readFileSync(path.join(root,'tratamientos/extensiones-pestanas-granollers.html'),'utf8');
 const extensionsGraph=JSON.parse(extensions.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
 for(const [fragment,price] of [['pelo-a-pelo','55.00'],['click-lash','35.00']]){const service=extensionsGraph.find(v=>(v['@id']||'').endsWith('#'+fragment));assert.equal(service.offers.price,price);assert.equal(service.offers.priceCurrency,'EUR');}
 const extensionsPrice=extensionsGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto cuestan las extensiones y cuánto dura la cita?').acceptedAnswer.text;
 assert.equal(extensions.match(/<summary>¿Cuánto cuestan las extensiones y cuánto dura la cita\?<\/summary><p>([^]*?)<\/p>/)[1].replace(/<[^>]+>/g,''),extensionsPrice,'Visible and structured extension prices must agree');
-assert(extensionsPrice.includes('Pelo a pelo: 55 €. Volumen (cualquier estilo): 55 €. Relleno: 35 €. Retirada: 15 €. Click Lash: 35 €'));
+assert(extensionsPrice.includes('La primera puesta cuesta 55 € para cualquier efecto, forma o volumen y dura unos 90 minutos. Relleno: 35 €. Retirada: 15 €. Click Lash™: 35 €'));
 assert(extensionsPrice.includes('cita de unos 30 minutos'));
 const lashes=fs.readFileSync(path.join(root,'tratamientos/pestanas-granollers.html'),'utf8');
 const lashesGraph=JSON.parse(lashes.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
@@ -134,9 +135,10 @@ const bcnHub=fs.readFileSync(path.join(root,"tratamientos/micropigmentacion-barc
 assert(bcnHub.includes("micropigmentacion-cejas-barcelona.html#precios-cejas-barcelona")&&barcelona.includes("id=\"precios-cejas-barcelona\""));
 assert(bcnHub.includes("285 €")&&bcnHub.includes("Desde 190 €")&&bcnHub.includes("Desde 450 €"));
 const volumeOffer=extensionsGraph.find(v=>v["@id"]==="https://nohuska.com/tratamientos/extensiones-pestanas-granollers.html#volumen");
-assert.equal(volumeOffer.offers.price,"55.00");assert(extensions.includes("id=\"volumen\""));
+const firstOffer=extensionsGraph.find(v=>v['@id']?.endsWith('#pelo-a-pelo')).offers;
+assert.equal(volumeOffer.offers['@id'],firstOffer['@id']);assert(firstOffer['@id'].endsWith('#primera-puesta'));assert.equal(firstOffer.price,'55.00');assert.equal(extensionsGraph.find(v=>v.url?.endsWith('#relleno')).offers.price,'35.00');assert(extensions.includes("id=\"volumen\""));
 assert(extensions.includes("Click Lash, pelo a pelo o volumen, fecha aproximada"));
-assert(extensions.includes("pelo a pelo 55 €, volumen 55 € y Click Lash 35 €"));
+assert(extensions.includes("Primera puesta: 55 € para cualquier efecto, forma o volumen. Click Lash™ y relleno: 35 € cada uno"));
 const liftingPage=fs.readFileSync(path.join(root,'tratamientos/lifting-pestanas-granollers.html'),'utf8');
 const liftingResult=JSON.parse(liftingPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'].find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto dura el resultado del lifting?').acceptedAnswer.text;
 assert.equal(liftingPage.match(/<summary>¿Cuánto dura el resultado del lifting\?<\/summary><p>([^]*?)<\/p>/)[1],liftingResult,'Visible and structured owner-confirmed lifting duration must agree');
@@ -149,14 +151,14 @@ for(const [name,price,fragment] of [['Click Lash','35','click-lash'],['Extension
 const liftingHero=liftingPage.match(/<section class="hero">([^]*?)<\/section>/)[1];
 const liftingLimits=JSON.parse(liftingPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'].find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Qué desventajas tiene el lifting de pestañas?').acceptedAnswer.text;
 assert.equal(liftingPage.match(/<summary>¿Qué desventajas tiene el lifting de pestañas\?<\/summary><p>([^]*?)<\/p>/)[1],liftingLimits,'Visible and structured lifting limitations must agree');
-for(const [name,price,url] of [['Lifting de pestañas · Lash Lift','55','lifting-pestanas-granollers.html'],['Nohuska Korean Gaze™','85','nohuska-korean-gaze-granollers.html'],['Laminado de cejas','55','nohuska-natural-brow-granollers.html'],['Natural Brow™','55','nohuska-natural-brow-granollers.html'],['Tinte híbrido','35','tinte-hibrido-cejas-granollers.html']]){
+for(const [name,price,url] of [['Lifting de pestañas · Lash Lift','55','lifting-pestanas-granollers.html'],['Nohuska Korean Gaze™','85','nohuska-korean-gaze-granollers.html'],['Laminado de cejas','45','nohuska-natural-brow-granollers.html#laminado-sin-tinte'],['Natural Brow™','55','nohuska-natural-brow-granollers.html'],['Tinte híbrido','35','tinte-hibrido-cejas-granollers.html']]){
  const card=[...home.matchAll(/<details class="treatment-item">([^]*?)<\/details>/g)].find(m=>m[1].includes('class="treatment-name">'+name+'</span>'));
  assert(card&&card[1].includes(price+' €')&&card[1].includes('href="tratamientos/'+url+'"'),'Homepage commercial cards must expose their confirmed offer and matching detail page');
 }
 assert(liftingHero.indexOf('55 €')<liftingHero.indexOf('<img'),'Show the confirmed lifting offer before its photo');
 assert(liftingHero.includes('tinte vegano incluido')&&liftingHero.includes('aproximadamente 1 hora'));
 const extensionHero=extensions.match(/<section class="hero">([^]*?)<\/section>/)[1];
-for(const price of ['Pelo a pelo: 55 €','Volumen: 55 €','Click Lash: 35 €'])assert(extensionHero.indexOf(price)>=0&&extensionHero.indexOf(price)<extensionHero.indexOf('<img'),'Show all three extension options before the photo');
+for(const price of ['Primera puesta: 55 €','Relleno: 35 €','Click Lash™: 35 €'])assert(extensionHero.indexOf(price)>=0&&extensionHero.indexOf(price)<extensionHero.indexOf('<img'),'Show the initial fee, refill and Click Lash price before the photo');
 assert(lashesGraph.find(v=>v['@type']==='Service').serviceType.includes('Extensiones de pestañas de volumen'));
 assert(lashes.includes('href="extensiones-pestanas-granollers.html#volumen"'),'The hub must route volume searches to the specialist page');
 const lashHubCta=lashes.match(/<a [^>]*data-cta-position="hero-extensiones"[^>]*>/)[0];
@@ -176,6 +178,7 @@ assert(lashGuide.includes('no son extensiones'),'Never present the existing lift
 assert(lashGuide.includes('data-service="lifting-pestanas" data-cta-position="cierre-guia-lifting"'),'The lifting CTA must not inherit extensions attribution from the guide filename');
 assert(lashGuide.includes('data-service="pestanas" data-cta-position="hero-guia-pestanas"'),'An undecided visitor must retain generic eyelash attribution');
 const naturalGraph=JSON.parse(naturalSnippet.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+const noTint=naturalGraph.find(v=>v['@type']==='Service' && (v.url||'').endsWith('#laminado-sin-tinte'));assert.equal(Number(noTint.offers.price),45);assert.equal(noTint.offers.priceCurrency,'EUR');
 const naturalFaq=naturalGraph.find(v=>v['@type']==='FAQPage');
 const naturalService=naturalGraph.find(v=>v['@type']==='Service');
 for(const component of ['Diseño de cejas','Tinte de cejas']){
@@ -196,8 +199,8 @@ const naturalChoice=naturalSnippet.match(/<section[^>]*aria-labelledby="elegir-n
 const browAdvice=new URL(naturalChoice.match(/href="(https:\/\/wa\.me\/[^"]+)"/)[1]);
 assert(browAdvice.pathname==='/34624011715' && /valoración gratuita/i.test(browAdvice.searchParams.get('text')) && /laminado/i.test(browAdvice.searchParams.get('text')) && !/micropigmentación/i.test(browAdvice.searchParams.get('text')),'Brow advice must not assume the client requested PMU');
 assert(naturalChoice.includes('<caption>Qué opción valorar según tu objetivo</caption>'));
-assert.equal([...naturalChoice.matchAll(/<th scope="row">/g)].length,4,'Keep the four customer goals distinct, without inventing separate laminating offers');
-for(const offer of ['Natural Brow™ · 55 € · aprox. 1 hora','Korean Gaze™ · 85 € · aprox. 90 minutos'])assert(naturalChoice.includes(offer),'Choice table must show the confirmed package scope and appointment time');
+assert.equal([...naturalChoice.matchAll(/<th scope="row">/g)].length,5,'The no-tint lamination has a distinct scope and price');
+for(const offer of ['Laminado sin tinte · 45 €','Natural Brow™ · 55 € · aprox. 1 hora','Korean Gaze™ · 85 € · aprox. 90 minutos'])assert(naturalChoice.includes(offer),'Choice table must show the confirmed package scope and appointment time');
 for(const target of ['cejas-granollers.html','tinte-hibrido-cejas-granollers.html#tinte-cejas-solo','nohuska-korean-gaze-granollers.html','micropigmentacion-cejas-granollers.html'])assert(naturalChoice.includes('href="'+target+'"'),'Alternative intentions must point to their existing service, not compete on this page');
 assert(naturalChoice.includes('El tinte está incluido en los 55 €, no es un suplemento')&&naturalChoice.includes('No incluye extensiones ni micropigmentación'));
 assert(!naturalSnippet.includes('sin un procedimiento semipermanente'),'Distinguish laminating from micropigmentation, not by claiming it has no temporary effect');

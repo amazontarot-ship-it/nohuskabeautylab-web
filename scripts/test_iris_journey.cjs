@@ -76,7 +76,7 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
       location.hash="";
     }
     if (file === "micropigmentacion-cejas-granollers.html") {
-      for (const [hash,label] of [["#microblading","Microblading manual"], ["#nanoblading","Nanoblading manual"], ["#resultado-nanoblading","Nanoblading manual"]]) {
+      for (const [hash,label] of [["#microblading","Microblading manual"], ["#nanoblading","Nanoblading manual"], ["#resultado-nanoblading","Nanoblading manual"], ["#hair-stroke","Hair Stroke"]]) {
         location.hash = hash; start();
         assert.equal(options[choice.selectedIndex].textContent,label,"Keep the technique even when its reporting code is shared");
         for (const [i,link] of links.entries()) {
@@ -131,6 +131,8 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
     assert.deepEqual(links, originals);
   }
 }
+const pmuHero=read("tratamientos/micropigmentacion-cejas-granollers.html").match(/<section class="hero">([\s\S]*?)<\/section>/)[1];
+assert(pmuHero.includes('href="nohuska-natural-brow-granollers.html">¿Buscabas laminado') && pmuHero.indexOf('¿Buscabas laminado')<pmuHero.indexOf('https://wa.me/'),'Provide the no-pigment route before a visitor starts a PMU enquiry');
 const lashGuide = read("guias/lifting-o-extensiones-pestanas.html");
 const lashClosing = lashGuide.match(/<section class="cta">([\s\S]*?)<\/section>/)[1];
 assert(lashClosing.includes('href="../tratamientos/extensiones-pestanas-granollers.html"') && lashClosing.includes('>Consultar lifting con tinte</a>'), "Offer extensions without relabelling a lifting enquiry");
@@ -143,7 +145,7 @@ for(const [pos,intent] of [["portada","valoración gratuita"],["portada-cita","s
 }
 assert(!home.includes('Tu primera visita es gratuita') && home.includes('href="resultados.html"'));
 const catalogue=JSON.parse(home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i)[1]).hasOfferCatalog.itemListElement;
-for(const [slug,words] of [["cejas-granollers",/diseño y depilación/i],["nohuska-natural-brow-granollers",/laminado y tinte/i],["micropigmentacion-cejas-granollers",/microblading y nanoblading manuales/i],["lifting-pestanas-granollers",/lifting coreano.*tinte/i],["extensiones-pestanas-granollers",/pelo a pelo, volumen y Click Lash/i]]){
+for(const [slug,words] of [["cejas-granollers",/diseño y depilación/i],["nohuska-natural-brow-granollers",/laminado de cejas sin tinte.*Natural Brow™ con tinte/i],["micropigmentacion-cejas-granollers",/microblading y nanoblading manuales/i],["lifting-pestanas-granollers",/lifting coreano.*tinte/i],["extensiones-pestanas-granollers",/pelo a pelo, volumen y Click Lash/i]]){
   const path="tratamientos/"+slug+".html",url="https://nohuska.com/"+path,entries=catalogue.filter(item=>item.url===url);
   assert.equal(entries.length,1);assert.match(entries[0].name,words);assert(home.includes('href="'+path+'"'));assert(read(path).includes('rel="canonical" href="'+url+'"'));
 }
