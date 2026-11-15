@@ -47,8 +47,12 @@ assert.ok(extensionContactTags.length > 0);
 for (const tag of extensionContactTags) {
   const url = new URL(tag[1]);
   assert.equal(url.origin + url.pathname, "https://wa.me/34624011715");
-  for (const modality of ["pelo a pelo", "volumen", "Click Lash"]) assert.ok(url.searchParams.get("text").includes(modality), "Generic extensions contact must retain all three choices");
+  if(tag[0].includes("data-fixed-consultation")){
+    const action=tag[0].match(/data-cta-position="comparativa-(relleno|retirada)"/)[1];
+    assert(url.searchParams.get("text").includes(action) && url.searchParams.get("text").includes("solicitar cita"));
+  }else for (const modality of ["pelo a pelo", "volumen", "Click Lash"]) assert.ok(url.searchParams.get("text").includes(modality), "Generic extensions contact must retain all three choices");
 }
+for(const action of ["relleno","retirada"])assert(extensionContactTags.some(tag=>tag[0].includes('data-cta-position="comparativa-'+action+'"') && tag[0].includes("data-fixed-consultation")));
 assert.doesNotMatch(read("tratamientos/lifting-pestanas-granollers.html"), /data-service="lifting-coreano"/);
 assert.match(read("tratamientos/lifting-pestanas-granollers.html"), /data-service="lifting-pestanas"/);
 assert.match(read("tratamientos/seo-treatment.css"), /@media\(max-width:760px\).*?\.mobile-contact\{display:flex/s);

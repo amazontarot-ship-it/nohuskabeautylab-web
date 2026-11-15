@@ -45,7 +45,7 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
         start();
         assert.equal(choice.value, service, "Catalogue links must keep the technique, without guessing for care enquiries");
         if (service) for (const [i, link] of links.entries()) {
-          if (originals[i].dataset.service === "extensiones-volumen") assert.deepEqual(link, originals[i]);
+          if (originals[i].dataset.service === "extensiones-volumen" || originals[i].dataset.fixedConsultation !== undefined) assert.deepEqual(link, originals[i]);
           else {
             const text = new URL(link.href).searchParams.get("text");
             assert(text.includes(choice.options[choice.selectedIndex].textContent));
@@ -62,6 +62,18 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
         assert.deepEqual(links, originals, "Browsing a section must not override an explicit request for general advice");
       }
       location.hash = "";
+    }
+    if (file === "cejas-granollers.html") {
+      const guide=read("tratamientos/guia-tratamientos-nohuska.html");
+      for (const [hash,label] of [["#diseno-cejas","Diseño de cejas"],["#depilacion-cejas","Depilación de cejas"]]) {
+        assert(guide.includes('href="cejas-granollers.html'+hash+'"'));
+        location.hash=hash; start();
+        assert.equal(options[choice.selectedIndex].textContent,label);
+        const booking=links.find(link=>link.dataset.contactIntent==="appointment");
+        assert(new URL(booking.href).searchParams.get("text").includes("solicitar cita para "+label));
+        choice.selectedIndex=0; listeners.change(); assert.deepEqual(links,originals);
+      }
+      location.hash="";
     }
     if (file === "micropigmentacion-cejas-granollers.html") {
       for (const [hash,label] of [["#microblading","Microblading manual"], ["#nanoblading","Nanoblading manual"], ["#resultado-nanoblading","Nanoblading manual"]]) {
@@ -124,6 +136,17 @@ const lashClosing = lashGuide.match(/<section class="cta">([\s\S]*?)<\/section>/
 assert(lashClosing.includes('href="../tratamientos/extensiones-pestanas-granollers.html"') && lashClosing.includes('>Consultar lifting con tinte</a>'), "Offer extensions without relabelling a lifting enquiry");
 assert(new URL(lashGuide.match(/class="mobile-contact"[^>]*href="([^"]+)"/)[1]).searchParams.get("text").includes("volumen"));
 const home = read("index.html");
+const heroActions=home.match(/<div class="hero-actions">([\s\S]*?)<\/div>/)[1];
+for(const [pos,intent] of [["portada","valoración gratuita"],["portada-cita","solicitar cita"]]){
+  const href=heroActions.match(new RegExp('data-cta-position="'+pos+'" href="([^"]+)"'))[1], wa=new URL(href);
+  assert.equal(wa.origin+wa.pathname,"https://wa.me/34624011715"); assert(wa.searchParams.get("text").includes(intent));
+}
+assert(!home.includes('Tu primera visita es gratuita') && home.includes('href="resultados.html"'));
+const catalogue=JSON.parse(home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i)[1]).hasOfferCatalog.itemListElement;
+for(const [slug,words] of [["cejas-granollers",/diseño y depilación/i],["nohuska-natural-brow-granollers",/laminado y tinte/i],["micropigmentacion-cejas-granollers",/microblading y nanoblading manuales/i],["lifting-pestanas-granollers",/lifting coreano.*tinte/i],["extensiones-pestanas-granollers",/pelo a pelo, volumen y Click Lash/i]]){
+  const path="tratamientos/"+slug+".html",url="https://nohuska.com/"+path,entries=catalogue.filter(item=>item.url===url);
+  assert.equal(entries.length,1);assert.match(entries[0].name,words);assert(home.includes('href="'+path+'"'));assert(read(path).includes('rel="canonical" href="'+url+'"'));
+}
 for (const treatment of ["Laminado de cejas", "Tinte de pestañas", "Lifting de pestañas con tinte", "Click Lash", "Extensiones de pestañas pelo a pelo"]) {
   assert.ok(home.includes("Consultar " + treatment + " por WhatsApp"));
 }
