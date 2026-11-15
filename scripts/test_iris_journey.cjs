@@ -27,6 +27,7 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
     });
     assert.ok(links.length >= 2);
     const originals = links.map(link => ({ ...link, dataset: { ...link.dataset } }));
+    if (file === "extensiones-pestanas-granollers.html") assert.ok(originals.some(link => link.textContent === "Consultar volumen y estilos"));
     const listeners = {};
     const choice = { options, selectedIndex: 0, get value() { return options[this.selectedIndex].value; }, addEventListener: (name, fn) => { listeners[name] = fn; } };
     vm.runInNewContext(script, { URL, document: { querySelector: () => choice, querySelectorAll: () => links }, window: { addEventListener: (name, fn) => { listeners[name] = fn; } } });
@@ -34,9 +35,13 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
       choice.selectedIndex = i;
       listeners.change();
       listeners.pageshow();
-      for (const link of links) {
+      for (const [index, link] of links.entries()) {
         const url = new URL(link.href);
         assert.equal(url.origin + url.pathname, "https://wa.me/34624011715");
+        if (originals[index].textContent === "Consultar volumen y estilos") {
+          assert.deepEqual(link, originals[index], "El enlace de la sección de volumen debe conservar su modalidad, mensaje y referencia");
+          continue;
+        }
         assert.ok(url.searchParams.get("text").includes(options[i].textContent));
         if (link.dataset.contactIntent === "valuation") {
           assert.ok(url.searchParams.get("text").includes("una valoración gratuita de "));

@@ -9,6 +9,8 @@
   function update() {
     var option = choice.options[choice.selectedIndex];
     links.forEach(function (original) {
+      // El enlace dentro de la sección de volumen no es parte del selector general.
+      if (original.service === "extensiones-volumen") return;
       var link = original.link;
       if (!choice.value) {
         link.href = original.href;
