@@ -82,7 +82,7 @@ for(const file of ['micropigmentacion-cejas-barcelona.html','cejas-valles-orient
 const comarca=fs.readFileSync(path.join(root,'tratamientos/micropigmentacion-valles-oriental.html'),'utf8');
 assert(comarca.includes('href="micropigmentacion-cejas-granollers.html"'));
 assert(!comarca.match(/<meta name="description"[^>]+>/)[0].includes('Natural Brow'),'Natural Brow is not micropigmentation');
-assert(menu.includes('285 €')&&menu.includes('pelo a pelo, 55 €')&&menu.includes('Click Lash, 35 €, cita de unos 30 minutos'));
+assert(menu.includes('285 €') && menu.includes('Pelo a pelo o volumen: 55 €') && /Click Lash: 35 €<\/strong>, en unos 30 minutos/.test(menu) && menu.includes('El relleno de extensiones cuesta 35 €'));
 assert(llms.includes('pelo a pelo 55 €, volumen 55 €')&&llms.includes('relleno 35 €, retirada 15 €, Click Lash 35 €'));
 const extensions=fs.readFileSync(path.join(root,'tratamientos/extensiones-pestanas-granollers.html'),'utf8');
 const extensionsGraph=JSON.parse(extensions.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
