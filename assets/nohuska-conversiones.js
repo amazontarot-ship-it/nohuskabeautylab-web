@@ -279,7 +279,7 @@
     var current = params.get("utm_campaign");
     var saved = getSessionValue("nohuska_campaign");
     // Una nueva fuente UTM inicia otra campaña; no mezclarla con la anterior.
-    var candidate = current || (params.get("utm_source") ? null : saved);
+    var candidate = current || (params.get("utm_source") || saved === "sin-campana" ? null : saved);
     var campaign = candidate ? (allowedCampaigns.indexOf(candidate) !== -1 ? candidate : "campana-otra") : "sin-campana";
 
     if (current || params.get("utm_source")) setSessionValue("nohuska_campaign", campaign);
