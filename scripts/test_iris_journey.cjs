@@ -7,7 +7,7 @@ const assert = require("node:assert/strict");
 const read = file => fs.readFileSync(path.join(__dirname, "..", file), "utf8");
 const script = read("assets/nohuska-recorrido.js");
 let cases = 0;
-for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.html", "micropigmentacion-cejas-granollers.html", "lifting-pestanas-granollers.html", "nohuska-natural-brow-granollers.html"]) {
+for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.html", "micropigmentacion-cejas-granollers.html", "lifting-pestanas-granollers.html", "nohuska-natural-brow-granollers.html", "nohuska-men-granollers.html"]) {
   const html = read("tratamientos/" + file);
   assert.match(html, /<label for="consultation-choice">/);
   assert.ok(html.indexOf("nohuska-conversiones.js") < html.indexOf("nohuska-recorrido.js"));
@@ -16,7 +16,7 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
   const pmu = file === "micropigmentacion-cejas-granollers.html";
   const lifting = file === "lifting-pestanas-granollers.html";
   const brow = file === "nohuska-natural-brow-granollers.html";
-  assert.equal(priced, pmu || lifting || brow || file === "extensiones-pestanas-granollers.html");
+  assert.equal(priced, pmu || lifting || brow || file === "extensiones-pestanas-granollers.html" || file === "nohuska-men-granollers.html");
   if (priced) {
     assert.equal(options[0].value, ""); assert.doesNotMatch(options[0].textContent, /€/);
     const hero = html.match(/<section class="hero">([\s\S]*?)<\/section>/)[1];
@@ -90,6 +90,7 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
         choice.selectedIndex = index; listeners.change();
         finish.value = "  Más elevadas\n  & fluffy <sin decidir>  "; listeners["finish-input"](); listeners.pageshow();
         for (const [i, link] of links.entries()) {
+          if (originals[i].dataset.fixedConsultation !== undefined) { assert.deepEqual(link, originals[i]); continue; }
           const text = new URL(link.href).searchParams.get("text");
           assert(text.includes("\nAcabado que busco: Más elevadas & fluffy <sin decidir>"));
           assert.equal((text.match(/Acabado que busco:/g) || []).length, 1);
@@ -170,7 +171,7 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
         assert.equal(name,label,"Keep the technique even when its reporting code is shared");
         for (const [i,link] of links.entries()) {
           const message = new URL(link.href).searchParams.get("text");
-          if (link.dataset.fixedConsultation !== undefined) { assert.deepEqual(link,originals[i]); assert(/valoración gratuita.*nanoblading/i.test(message)); continue; }
+          if (link.dataset.fixedConsultation !== undefined) { assert.deepEqual(link,originals[i]); continue; }
           assert(message.includes(label) && link.dataset.service === "micropigmentacion-cejas");
           if (originals[i].dataset.contactIntent === "appointment") assert(message.includes(price === "A valorar" ? "presupuesto" : "solicitar cita"));
           if (withReference) assert(message.endsWith("Referencia: WEB-MICROPIGMENTACION-CEJAS-GRANOLLERS-INSTAGRAM-SOCIAL"));

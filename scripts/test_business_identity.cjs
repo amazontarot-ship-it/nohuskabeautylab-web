@@ -298,4 +298,47 @@ assert(liftingPage.includes('<q>Me hice el lifting de pestañas + tinte. Me ha e
 assert(liftingPage.includes('href="https://share.google/avmiWneWwmrhqdJWC"')&&liftingPage.includes('es una opinión individual, no acredita el caso fotografiado ni garantiza un resultado'),'Keep the verified review source without implying the reviewer is the photographed client or guaranteeing a result');
 const homeBrowChoice=home.match(/<a class="seo-path" href="tratamientos\/micropigmentacion-cejas-granollers.html">([^]*?)<\/a>/)[1];
 assert(homeBrowChoice.includes('Nanoblading manual: 297 € · sesión inicial de aproximadamente 2 horas · repaso no incluido'),'The homepage cited by assistants must expose the confirmed nanoblading price, initial appointment time and excluded follow-up');
-console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official place ID, address and phone; no foreign identity or self-serving review schema; direct review route and active eyelash choices.`);
+// Men remains a service section of the same business, without invented male result photographs.
+const menPage=fs.readFileSync(path.join(root,'tratamientos/nohuska-men-granollers.html'),'utf8');
+const moustachePage=fs.readFileSync(path.join(root,'tratamientos/laminado-bigote-granollers.html'),'utf8');
+for(const [slug,html] of [['nohuska-men-granollers',menPage],['laminado-bigote-granollers',moustachePage]]){
+ const url='https://nohuska.com/tratamientos/'+slug+'.html';
+ assert(html.includes('rel="canonical" href="'+url+'"') && html.includes('content="index,follow'));
+ assert(html.includes('Nohuska Beauty Lab · Avinguda Sant Esteve, 40 · 08402 Granollers · +34 624 011 715'));
+ assert(html.includes('href="tel:+34624011715"') && html.includes('src="../assets/logo-nohuska-recortado.png"'));
+ assert(html.includes('fotografía') || html.includes('Fotografía'));
+ for(const img of html.matchAll(/<img\b[^>]*src="([^"]+)"/g)) assert(['../assets/logo-nohuska-recortado.png','../assets/espacio-nohuska-beauty-lab.webp'].includes(img[1]),'No unverified treatment result in '+slug);
+ const graph=JSON.parse(html.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+ walk(graph,node=>{
+  assert(![].concat(node['@type']||[]).some(type=>['LocalBusiness','BeautySalon','Organization','HealthAndBeautyBusiness'].includes(type)),'Do not create a separate Men business');
+  if(node.provider) assert.equal(node.provider['@id'],'https://nohuska.com/#business');
+  assert(!node.review && !node.aggregateRating,'No invented Men rating');
+ });
+ assert.doesNotMatch(html,/adsbygoogle|googlesyndication|fbq\(/,'This preparation must not introduce advertising');
+}
+const menGraph=JSON.parse(menPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+assert.equal(menGraph.find(node=>node['@type']==='CollectionPage').about['@id'],'https://nohuska.com/#business');
+const menOptions=[...menPage.matchAll(/<option\b[^>]*value="([^"]*)"[^>]*>([^<]+)<\/option>/g)];
+assert.deepEqual(menOptions.map(m=>[m[1],m[2]]),[
+ ['','Necesito orientación para elegir'],['cejas','Diseño de cejas masculino · 15 €'],['cejas','Diseño de cejas masculino Premium · 18 €'],
+ ['laminado-cejas','Laminado de cejas masculino sin tinte · 45 €'],['nohuska-brow','Natural Brow con tinte para hombre · 55 €'],['laminado-bigote','Laminado o alisado de bigote · 48 €'],
+ ['limpieza-facial','Limpieza facial coreana para hombre · 50 €'],['micropigmentacion-cejas','Microblading masculino · 297 €'],['micropigmentacion-cejas','Nanoblading masculino · 297 €'],
+ ['micropigmentacion-cejas','Micropigmentación de cejas para hombre · 230 €'],['micropigmentacion-capilar','Micropigmentación capilar masculina · A valorar']
+]);
+assert(!/visagismo|diseño personalizado/.test(menOptions[1][0]) && /visagismo, diseño personalizado y depilación/.test(menOptions[2][0]),'Keep basic maintenance separate from Premium');
+assert(menOptions[7][0].includes('repaso no incluido') && menOptions[8][0].includes('2 horas; repaso no incluido'));
+assert(!menOptions[7][0].includes('2 horas'),'Do not copy nanoblading duration to microblading');
+assert(menPage.includes('no detiene la caída ni hace crecer pelo') && /no son nombres intercambiables/i.test(menPage));
+const moustacheGraph=JSON.parse(moustachePage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+const moustacheService=moustacheGraph.find(node=>node['@type']==='Service');
+assert.equal(moustacheService.provider['@id'],'https://nohuska.com/#business');
+assert.equal(moustacheService.offers.seller['@id'],'https://nohuska.com/#business');
+assert.equal(moustacheService.offers.price,'48.00');assert.equal(moustacheService.offers.priceCurrency,'EUR');
+for(const question of moustacheGraph.find(node=>node['@type']==='FAQPage').mainEntity) assert(moustachePage.includes('<summary>'+question.name+'</summary><p>'+question.acceptedAnswer.text+'</p>'),'Bigote FAQ must match visible text');
+assert(moustachePage.includes('50 minutos') && moustachePage.includes('productos aptos para esta zona') && moustachePage.includes('no muestra un resultado de laminado de bigote'));
+const maleCapilar=fs.readFileSync(path.join(root,'tratamientos/micropigmentacion-capilar-granollers.html'),'utf8');
+assert(maleCapilar.includes('450 € cubren las 3 sesiones del plan') && maleCapilar.includes('no 450 € por sesión'),'Entradas price is the complete three-session plan');
+const originalNanoContact=brow.match(/<a\b[^>]*data-cta-position="caso-nanoblading"[^>]*>/)[0];
+assert(originalNanoContact.includes('data-fixed-consultation') && originalNanoContact.includes('data-contact-intent="valuation"'));
+assert.match(new URL(originalNanoContact.match(/href="([^"]+)"/)[1]).searchParams.get('text'),/valoración gratuita.*nanoblading.*antes y después/i,'Keep the own-case nanoblading enquiry specific');
+console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official identity, Men prices/limits and no invented male photographs or review markup.`);
