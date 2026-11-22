@@ -70,7 +70,7 @@ assert.ok(/@media\(max-width:760px\)\{\.nohuska-cookie-banner\{[^}]*bottom:78px/
 console.log("PASS: firmas destinations, mobile contact routes/messages, responsive rule and lifting labels (static markup).");
 
 // Las barras fijas no deben competir con los contactos ni los campos del contenido.
-for (const file of ["lifting-pestanas-granollers.html", "nohuska-natural-brow-granollers.html", "cejas-granollers.html", "micropigmentacion-cejas-granollers.html", "limpieza-facial-coreana-granollers.html", "micropigmentacion-capilar-granollers.html"]) {
+for (const file of ["lifting-pestanas-granollers.html", "nohuska-natural-brow-granollers.html", "cejas-granollers.html", "micropigmentacion-cejas-granollers.html", "limpieza-facial-coreana-granollers.html", "micropigmentacion-capilar-granollers.html", "centro-estetica-granollers.html"]) {
 const lifting=read("tratamientos/" + file);
 assert.match(lifting, /class="mobile-contact" hidden/);
 assert.match(lifting, /\.mobile-contact\[hidden\]\{display:none\}/);
@@ -91,7 +91,7 @@ callback([{target:contacts[1],isIntersecting:true},{target:contacts[0],isInterse
 callback([{target:contacts[1],isIntersecting:false}]);assert(!floating.hidden);
 callback([{target:preferences,isIntersecting:true}]);assert(floating.hidden);
 }
-console.log("PASS: six treatment floating contacts yield to visible contacts, selection controls and cookie preferences.");
+console.log("PASS: seven treatment floating contacts yield to visible contacts, selection controls and cookie preferences.");
 
 const menLayout=read('tratamientos/nohuska-men-granollers.html');
 assert(!menLayout.match(/<div\b[^>]*id="laminado-masculino"[^>]*>/)[0].includes('data-consultation-value'),'The general male lamination section must not assume tint or no tint');

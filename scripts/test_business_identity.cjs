@@ -341,4 +341,37 @@ assert(maleCapilar.includes('450 € cubren las 3 sesiones del plan') && maleCap
 const originalNanoContact=brow.match(/<a\b[^>]*data-cta-position="caso-nanoblading"[^>]*>/)[0];
 assert(originalNanoContact.includes('data-fixed-consultation') && originalNanoContact.includes('data-contact-intent="valuation"'));
 assert.match(new URL(originalNanoContact.match(/href="([^"]+)"/)[1]).searchParams.get('text'),/valoración gratuita.*nanoblading.*antes y después/i,'Keep the own-case nanoblading enquiry specific');
-console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official identity, Men prices/limits and no invented male photographs or review markup.`);
+// Confirmed facial offer: the cervical massage is included, not a medical claim or surcharge.
+const facialOfferPage=fs.readFileSync(path.join(root,'tratamientos/limpieza-facial-coreana-granollers.html'),'utf8');
+const centreOfferPage=fs.readFileSync(path.join(root,'tratamientos/centro-estetica-granollers.html'),'utf8');
+const facialGraph=JSON.parse(facialOfferPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+const facialService=facialGraph.find(node=>node['@type']==='Service');
+assert.equal(facialService.offers.price,'50.00');assert.equal(facialService.offers.priceCurrency,'EUR');
+assert.equal(facialService.provider['@id'],'https://nohuska.com/#business');
+assert.match(facialService.description,/exfoliación.*extracción.*mascarilla.*facial, capilar y de cervicales.*50 EUR.*1 hora/);
+const normalizeFacial=text=>text.replace(/<[^>]+>/g,'').replace(/EUR/g,'€').replace(/\s+/g,' ').trim();
+for(const name of ['¿Qué incluye la limpieza facial profunda?','¿Cuánto cuesta la limpieza facial en Nohuska?','¿La valoración facial es gratuita?']){
+ const question=facialGraph.find(node=>node['@type']==='FAQPage').mainEntity.find(item=>item.name===name);
+ const visible=[...facialOfferPage.matchAll(/<summary>([^]*?)<\/summary><p>([^]*?)<\/p>/g)].find(item=>item[1]===name);
+ assert(question && visible,name);assert.equal(normalizeFacial(question.acceptedAnswer.text),normalizeFacial(visible[2]),name+' must match its visible answer');
+}
+for(const html of [facialOfferPage,centreOfferPage,menPage,home,menu]){
+ assert.match(html,/facial, capilar y (?:de cervicales|cervical)/,'Keep the confirmed included massages coherent');
+ assert.doesNotMatch(html,/sin química|cero irritación|apto para cualquier piel|trata(?:r)? (?:dolor cervical|contracturas)/i);
+}
+for(const [file,html] of [['facial',facialOfferPage],['centro',centreOfferPage]]){
+ const facialContacts=[...html.matchAll(/<a\b[^>]*data-service="limpieza-facial"[^>]*href="(https:\/\/wa\.me\/[^\"]+)"[^>]*>/g)];
+ assert.equal(facialContacts.length,file==='facial'?8:2,file+' facial contacts');
+ for(const match of facialContacts){
+  const tag=match[0],url=new URL(match[1]),message=url.searchParams.get('text');
+  assert.equal(url.origin+url.pathname,'https://wa.me/34624011715');assert.match(message,/higiene facial|limpieza facial/);
+  assert.doesNotMatch(message,/lifting|cejas|micropigmentación|CAMPANA-OTRA/);
+  const intent=tag.match(/data-contact-intent="([^"]+)"/)[1];
+  if(intent==='appointment'){assert.match(message,/solicitar cita/);assert.match(message,/50 €/);}
+  else{assert.equal(intent,'valuation');assert.match(message,/valoración gratuita/);assert.doesNotMatch(message,/solicitar cita/);}
+ }
+}
+assert.match(facialOfferPage,/valoración gratuita es opcional/);
+assert.match(centreOfferPage,/id="cuidado-facial"/);
+assert.match(centreOfferPage,/data-service="general"[^>]*data-contact-intent="valuation"/);
+console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official identity, confirmed facial offer and treatment-specific contact intentions.`);
