@@ -45,7 +45,8 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
   } else if (pmu) {
     assert.deepEqual(options.slice(1).map(o => o.textContent).sort(), [
       "Micropigmentación de cejas · 230 €", "Microblading manual · 297 €", "Nanoblading manual · 297 €",
-      "Corrección de un trabajo antiguo · A valorar", "Hair Stroke · A valorar", "Powder Brows · A valorar"
+      "Corrección de un trabajo antiguo · A valorar", "Hair Stroke · A valorar", "Powder Brows · A valorar",
+      "Repaso de un trabajo de Nohuska · A valorar", "Trabajo de otro centro · A valorar"
     ].sort());
   }
   for (const withReference of [false, true]) {
@@ -60,9 +61,14 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
     });
     assert.ok(links.length >= 2);
     const originals = links.map(link => ({ ...link, dataset: { ...link.dataset } }));
-    const pmuActions = ["Enviar mis fotografías", "Solicitar valoración"];
+    const pmuActions = ["Consultar mi repaso en Nohuska", "Valorar un trabajo de otro centro", "Valorar una posible corrección"];
     if (pmu) {
-      for (const label of pmuActions) assert.equal(originals.filter(link => link.textContent === label).length, 1);
+      for (const label of pmuActions) {
+        const matches=originals.filter(link=>link.textContent===label);assert.equal(matches.length,1);
+        const link=matches[0];assert.equal(link.dataset.fixedConsultation,"");assert.equal(link.dataset.contactIntent,"valuation");
+        assert.match(new URL(link.href).searchParams.get("text"),/valoración gratuita/);
+        assert.doesNotMatch(new URL(link.href).searchParams.get("text"),/solicitar cita|\d+\s*€/);
+      }
     }
     if (priced) {
       if (file === "extensiones-pestanas-granollers.html") assert.ok(originals.some(link => link.textContent === "Consultar volumen y estilos"));
@@ -165,7 +171,7 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
       location.hash="";
     }
     if (pmu) {
-      for (const [hash,label] of [["#microblading","Microblading manual"], ["#nanoblading","Nanoblading manual"], ["#resultado-nanoblading","Nanoblading manual"], ["#hair-stroke","Hair Stroke"], ["#correccion","Corrección de un trabajo antiguo"]]) {
+      for (const [hash,label] of [["#microblading","Microblading manual"], ["#nanoblading","Nanoblading manual"], ["#resultado-nanoblading","Nanoblading manual"], ["#hair-stroke","Hair Stroke"], ["#repaso-nohuska","Repaso de un trabajo de Nohuska"], ["#trabajo-otro-centro","Trabajo de otro centro"], ["#correccion","Corrección de un trabajo antiguo"]]) {
         location.hash = hash; start();
         const [name, price] = options[choice.selectedIndex].textContent.split(" · ");
         assert.equal(name,label,"Keep the technique even when its reporting code is shared");
@@ -183,7 +189,7 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
       }
       location.hash="";
       start();
-      for (const [label,intent] of [["Corrección de un trabajo antiguo","quote"],["Nanoblading manual","appointment"]]) {
+      for (const [label,intent] of [["Repaso de un trabajo de Nohuska","quote"],["Nanoblading manual","appointment"],["Trabajo de otro centro","quote"],["Microblading manual","appointment"],["Corrección de un trabajo antiguo","quote"],["Micropigmentación de cejas","appointment"]]) {
         choice.selectedIndex = options.findIndex(o=>o.textContent.startsWith(label+" · "));
         listeners.change(); listeners.pageshow();
         for (const [i,link] of links.entries()) if (originals[i].dataset.contactIntent === "appointment") assert.equal(link.dataset.contactIntent,intent);

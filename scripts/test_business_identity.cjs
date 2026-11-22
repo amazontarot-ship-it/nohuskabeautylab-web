@@ -374,4 +374,24 @@ for(const [file,html] of [['facial',facialOfferPage],['centro',centreOfferPage]]
 assert.match(facialOfferPage,/valoración gratuita es opcional/);
 assert.match(centreOfferPage,/id="cuidado-facial"/);
 assert.match(centreOfferPage,/data-service="general"[^>]*data-contact-intent="valuation"/);
+// Freckles: a request for an appointment is distinct from a free valuation, never a fixed-price booking.
+for(const [file,count] of [['freckles-barcelona.html',4],['micropigmentacion-pecas-granollers.html',5]]){
+ const html=fs.readFileSync(path.join(root,'tratamientos',file),'utf8');
+ const contacts=[...html.matchAll(/<a\b[^>]*href="(https:\/\/wa\.me\/[^\"]+)"[^>]*>/g)];
+ assert.equal(contacts.length,count,file+' WhatsApp contacts');
+ assert.match(html,/Avinguda Sant Esteve, 40, 08402 Granollers/);assert.match(html,/desde 190 €|Desde 190 €/);
+ assert.match(html,/Una consulta por WhatsApp no confirma una reserva/);
+ const intents=[];
+ for(const match of contacts){
+  const tag=match[0],url=new URL(match[1]),message=url.searchParams.get('text');
+  assert.equal(url.origin+url.pathname,'https://wa.me/34624011715');assert.match(tag,/data-service="pecas"/);
+  assert.match(tag,/data-cta-position="[^"]+"/);assert.match(message,/pecas/);
+  assert.doesNotMatch(message,/190|vengo desde Barcelona|CAMPANA-OTRA|lifting|cejas/);
+  const intent=tag.match(/data-contact-intent="([^"]+)"/)[1];intents.push(intent);
+  if(intent==='appointment'){assert.match(message,/solicitar cita/);assert.match(message,/disponibilidad y presupuesto/);assert.match(message,/Granollers/);}
+  else{assert.equal(intent,'valuation');assert.match(message,/valoración gratuita/);assert.doesNotMatch(message,/solicitar cita/);}
+ }
+ assert.equal(intents.filter(intent=>intent==='appointment').length,2,file+' hero and closing appointment routes');
+ assert.match(html,/<a class="mobile-contact"[^>]*data-contact-intent="valuation"/);
+}
 console.log(`PASS: ${files} public HTML; ${mapsLinks} Maps references; official identity, confirmed facial offer and treatment-specific contact intentions.`);
