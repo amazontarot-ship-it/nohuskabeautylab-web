@@ -164,7 +164,29 @@ assert(lashes.includes('href="extensiones-pestanas-granollers.html#volumen"'),'T
 const lashHubCta=lashes.match(/<a [^>]*data-cta-position="hero-extensiones"[^>]*>/)[0];
 const lashHubMessage=new URL(lashHubCta.match(/href="([^"]+)"/)[1]).searchParams.get('text');
 assert(lashHubCta.includes('data-service="extensiones-pestanas"')&&/pelo a pelo y volumen/i.test(lashHubMessage),'The general extensions CTA must not preselect one technique');
-assert(lashes.includes('Lifting con tinte sobre pestaña natural; no son extensiones.</figcaption>'),'Identify the lifting photo beside the extensions CTAs');
+const lashPhotoCaption=lashes.match(/<figcaption>([^]*?)<\/figcaption>/)[1];
+assert.equal(lashPhotoCaption.replace(/<[^>]+>/g,''),'Lifting con tinte sobre pestaña natural; no son extensiones.','Identify the actual lifting photo, never claim an extensions result');
+assert(lashPhotoCaption.includes('href="lifting-pestanas-granollers.html"'),'The lifting image must point to its own treatment');
+const colorService=extensionsGraph.find(v=>v.url?.endsWith('#colores-extensiones'));
+assert(colorService && !colorService.offers,'Do not invent a color price or reuse the standard first-placement offer');
+assert.equal(colorService.provider['@id'],'https://nohuska.com/#business');
+assert(colorService.description.includes('consulta disponibilidad y precio antes de reservar') && !/\d+\s*€/.test(colorService.description),'Color selection has no assumed price');
+const colorFaq=extensionsGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Hay extensiones marrones o de colores?');
+assert.equal(colorFaq.acceptedAnswer.text,colorService.description);
+assert(extensions.includes('<summary>'+colorFaq.name+'</summary><p>'+colorFaq.acceptedAnswer.text+'</p>'));
+const extensionBody=extensions.split('<main>')[1];
+let prior=-1;
+for(const id of ['pelo-a-pelo','volumen','colores-extensiones','click-lash','cuidados-extensiones']){
+ const position=extensionBody.indexOf('id="'+id+'"');
+ assert(position>prior,'Extensions first, then colors, Click Lash and maintenance'); prior=position;
+}
+for(const file of ['tratamientos/pestanas-granollers.html','guias/lifting-o-extensiones-pestanas.html','tratamientos/pestanas-valles-oriental.html']){
+ const html=fs.readFileSync(path.join(root,file),'utf8');
+ const colorBlock=[...html.matchAll(/<(p|li)>([^]*?)<\/\1>/g)].find(m=>m[2].includes('extensiones-pestanas-granollers.html#colores-extensiones'));
+ assert(colorBlock,'The color route must be visible in a useful paragraph or list item');
+ const colorContext=colorBlock[2].replace(/<[^>]+>/g,'');
+ assert(/consulta|confirman/i.test(colorContext) && /tono/.test(colorContext) && /disponibilidad y (?:el )?precio/.test(colorContext),'Supporting pages must link the real color service with price and availability to confirm');
+}
 const lashGuide=fs.readFileSync(path.join(root,'guias/lifting-o-extensiones-pestanas.html'),'utf8');
 const lashGuideGraph=JSON.parse(lashGuide.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
 const guideTint=lashGuideGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Se puede combinar el lifting con tinte?').acceptedAnswer.text;

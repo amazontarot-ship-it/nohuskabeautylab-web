@@ -48,11 +48,19 @@ for (const tag of extensionContactTags) {
   const url = new URL(tag[1]);
   assert.equal(url.origin + url.pathname, "https://wa.me/34624011715");
   if(tag[0].includes("data-fixed-consultation")){
-    const action=tag[0].match(/data-cta-position="comparativa-(relleno|retirada)"/)[1];
-    assert(url.searchParams.get("text").includes(action) && url.searchParams.get("text").includes("solicitar cita"));
+    const maintenance=tag[0].match(/data-cta-position="comparativa-(relleno|retirada)"/);
+    const color=tag[0].match(/data-cta-position="color-(marrones|granates|otros)"/);
+    const message=url.searchParams.get("text");
+    assert(maintenance || color, "Every fixed consultation must have an explicit tested purpose");
+    if(maintenance) assert(message.includes(maintenance[1]) && message.includes("solicitar cita"));
+    else {
+      assert(message.includes(color[1] === "otros" ? "tonos disponibles" : color[1]));
+      assert(message.includes("consultar") && message.includes("precio") && !/\d+\s*€/.test(message), "Colors require a quote, not an assumed first-placement fee");
+    }
   }else for (const modality of ["pelo a pelo", "volumen", "Click Lash"]) assert.ok(url.searchParams.get("text").includes(modality), "Generic extensions contact must retain all three choices");
 }
 for(const action of ["relleno","retirada"])assert(extensionContactTags.some(tag=>tag[0].includes('data-cta-position="comparativa-'+action+'"') && tag[0].includes("data-fixed-consultation")));
+for(const color of ["marrones","granates","otros"]) assert.equal(extensionContactTags.filter(tag=>tag[0].includes('data-cta-position="color-'+color+'"') && tag[0].includes("data-fixed-consultation")).length,1);
 assert.doesNotMatch(read("tratamientos/lifting-pestanas-granollers.html"), /data-service="lifting-coreano"/);
 assert.match(read("tratamientos/lifting-pestanas-granollers.html"), /data-service="lifting-pestanas"/);
 assert.match(read("tratamientos/seo-treatment.css"), /@media\(max-width:760px\).*?\.mobile-contact\{display:flex/s);

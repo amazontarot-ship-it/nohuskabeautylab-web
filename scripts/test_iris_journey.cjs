@@ -22,8 +22,8 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
   }
   if (file === "extensiones-pestanas-granollers.html") {
     assert.deepEqual(options.slice(1).map(o => [o.value, o.textContent]), [
-      ["click-lash", "Click Lash · 35 €"], ["extensiones-pelo-a-pelo", "Extensiones pelo a pelo · 55 €"],
-      ["extensiones-volumen", "Extensiones de volumen · 55 €"], ["extensiones-pestanas", "Relleno de extensiones · 35 €"],
+      ["extensiones-pelo-a-pelo", "Extensiones pelo a pelo · 55 €"], ["extensiones-volumen", "Extensiones de volumen · 55 €"],
+      ["click-lash", "Click Lash · 35 €"], ["extensiones-pestanas", "Relleno de extensiones · 35 €"],
       ["extensiones-pestanas", "Retirada de extensiones · 15 €"]
     ]);
   } else if (pmu) {
@@ -221,7 +221,14 @@ for (const file of fs.readdirSync(path.join(__dirname, "../tratamientos")).filte
 }
 const lashes = read("tratamientos/pestanas-granollers.html");
 assert.match(lashes, /data-service="extensiones-pestanas" data-cta-position="hero-extensiones"/);
-assert.match(lashes, /data-service="pestanas" data-cta-position="alternativa-pestanas"/);
+assert.match(lashes, /data-service="extensiones-pestanas" data-cta-position="alternativa-pestanas"/);
+const maintenanceMessage=new URL(lashes.match(/data-cta-position="alternativa-pestanas"[^>]*href="([^"]+)"/)[1]).searchParams.get('text');
+assert(/relleno/.test(maintenanceMessage) && /retirada/.test(maintenanceMessage),'Maintenance enquiries must not become a new first placement');
+for(const [position,service,words] of [['cierre-guia-extensiones','extensiones-pestanas',/solicitar cita.*pelo a pelo o volumen/],['cierre-guia-lifting','lifting-pestanas',/consultar disponibilidad.*lifting coreano con tinte/]]){
+ const link=lashGuide.match(new RegExp('<a[^>]*data-cta-position="'+position+'"[^>]*>'))[0];
+ assert(link.includes('data-service="'+service+'"') && link.includes('data-fixed-consultation'));
+ assert.match(new URL(link.match(/href="([^"]+)"/)[1]).searchParams.get('text'),words);
+}
 const browPage = read("tratamientos/micropigmentacion-cejas-granollers.html");
 const browHero = pmuHero.match(/data-cta-position="hero-micropigmentacion-cejas-granollers-valoracion"[^>]*href="([^"]+)"/)[1];
 assert.match(new URL(browHero).searchParams.get("text"), /valoración gratuita de cejas.*microblading, nanoblading/);
