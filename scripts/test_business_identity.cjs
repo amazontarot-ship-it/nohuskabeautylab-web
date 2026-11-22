@@ -68,7 +68,7 @@ const regionalLashes=fs.readFileSync(path.join(root,'tratamientos/pestanas-valle
 const regionalLashGraph=JSON.parse(regionalLashes.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
 const regionalTint=regionalLashGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿El lifting coreano incluye tinte?').acceptedAnswer.text;
 assert.equal(regionalLashes.match(/<summary>¿El lifting coreano incluye tinte\?<\/summary><p>([^]*?)<\/p>/)[1],regionalTint,'Regional visible and structured tint inclusion must agree');
-assert(regionalTint.includes('incluye tinte vegano por 55 €'));
+assert(regionalTint.includes('sin tinte por 45 €')&&regionalTint.includes('45 minutos')&&regionalTint.includes('con tinte vegano por 55 €')&&regionalTint.includes('1 hora'));
 assert(regionalLashes.includes('href="../resultados.html#lifting-coreano"'));
 for(const file of ['micropigmentacion-cejas-barcelona.html','micropigmentacion-capilar-barcelona.html']){
  const html=fs.readFileSync(path.join(root,'tratamientos',file),'utf8');
@@ -122,7 +122,8 @@ for(const file of ['nohuska-natural-brow-granollers.html','lifting-pestanas-gran
  const html=fs.readFileSync(path.join(root,'tratamientos',file),'utf8');
  const description=html.match(/<meta name="description" content="([^"]+)"/)[1];
  assert.equal(description,html.match(/<meta property="og:description" content="([^"]+)"/)[1],file+' search and social descriptions must agree');
- assert(description.includes('55 €')&&description.includes('1 hora')&&description.includes('valoración gratuita'),file+' snippet must reflect the confirmed offer');
+ assert(description.includes('55 €')&&/1 (?:hora|h)\b/.test(description)&&description.includes('valoración gratuita'),file+' snippet must reflect the confirmed offer');
+ if(file==='lifting-pestanas-granollers.html')assert(description.includes('sin tinte 45 €/45 min')&&description.includes('con tinte vegano 55 €/1 h'),'Snippet must distinguish both lifting variants');
 }
 const naturalSnippet=fs.readFileSync(path.join(root,'tratamientos/nohuska-natural-brow-granollers.html'),'utf8');
 assert.equal([...naturalSnippet.matchAll(/<div class="fact" data-nosnippet>/g)].length,2,'Exclude only the duplicate price/time cards from snippets');
@@ -140,6 +141,24 @@ assert.equal(volumeOffer.offers['@id'],firstOffer['@id']);assert(firstOffer['@id
 assert(extensions.includes("Click Lash, pelo a pelo o volumen, fecha aproximada"));
 assert(extensions.includes("Primera puesta: 55 € para cualquier efecto, forma o volumen. Click Lash™ y relleno: 35 € cada uno"));
 const liftingPage=fs.readFileSync(path.join(root,'tratamientos/lifting-pestanas-granollers.html'),'utf8');
+const liftingGraph=JSON.parse(liftingPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
+const liftingOffers=liftingGraph.find(v=>v['@type']==='Service').offers;
+assert.equal(liftingOffers.length,2,'One Korean protocol, exactly two confirmed tint options');
+for(const [fragment,name,price] of [['lifting-sin-tinte','Lifting coreano sin tinte','45.00'],['lifting-con-tinte','Lifting coreano con tinte vegano','55.00']]){
+ const offer=liftingOffers.find(o=>o.url.endsWith('#'+fragment));
+ assert(offer,'Each lifting price must link its actual variant');
+ assert.equal(offer.name,name);assert.equal(offer.price,price);assert.equal(offer.priceCurrency,'EUR');assert.equal(offer.seller['@id'],'https://nohuska.com/#business');
+ assert(liftingPage.includes('id="'+fragment+'" data-consultation-value="opcion-'+fragment+'"'));
+ for(const file of ['index.html','tratamientos/pestanas-granollers.html','tratamientos/pestanas-valles-oriental.html','tratamientos/guia-tratamientos-nohuska.html','guias/lifting-o-extensiones-pestanas.html'])
+  assert(fs.readFileSync(path.join(root,file),'utf8').includes('lifting-pestanas-granollers.html#'+fragment),file+' must route both lifting options to the canonical landing');
+}
+for(const question of liftingGraph.find(v=>v['@type']==='FAQPage').mainEntity){
+ const visible=[...liftingPage.matchAll(/<summary>([^]*?)<\/summary><p>([^]*?)<\/p>/g)].find(m=>m[1]===question.name);
+ assert(visible,'Missing visible lifting answer: '+question.name);
+ assert.equal(visible[2].replace(/<[^>]+>/g,''),question.acceptedAnswer.text);
+}
+assert(liftingPage.includes('mismo protocolo coreano')&&liftingPage.includes('hidratación durante el tratamiento'));
+assert(llms.includes('sin tinte, 45 € / unos 45 minutos; con tinte vegano, 55 € / aproximadamente 1 hora'));
 const liftingResult=JSON.parse(liftingPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'].find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Cuánto dura el resultado del lifting?').acceptedAnswer.text;
 assert.equal(liftingPage.match(/<summary>¿Cuánto dura el resultado del lifting\?<\/summary><p>([^]*?)<\/p>/)[1],liftingResult,'Visible and structured owner-confirmed lifting duration must agree');
 assert(liftingResult.includes('5–6 semanas')&&liftingResult.includes('no una garantía')&&liftingResult.includes('1 hora'));
@@ -156,7 +175,7 @@ for(const [name,price,url] of [['Lifting de pestañas · Lash Lift','55','liftin
  assert(card&&card[1].includes(price+' €')&&card[1].includes('href="tratamientos/'+url+'"'),'Homepage commercial cards must expose their confirmed offer and matching detail page');
 }
 assert(liftingHero.indexOf('55 €')<liftingHero.indexOf('<img'),'Show the confirmed lifting offer before its photo');
-assert(liftingHero.includes('tinte vegano incluido')&&liftingHero.includes('aproximadamente 1 hora'));
+assert(liftingHero.includes('sin tinte')&&liftingHero.includes('45 €')&&liftingHero.includes('45 min aprox.')&&liftingHero.includes('tinte vegano')&&liftingHero.includes('1 h aprox.'));
 const extensionHero=extensions.match(/<section class="hero">([^]*?)<\/section>/)[1];
 for(const price of ['Primera puesta: 55 €','Relleno: 35 €','Click Lash™: 35 €'])assert(extensionHero.indexOf(price)>=0&&extensionHero.indexOf(price)<extensionHero.indexOf('<img'),'Show the initial fee, refill and Click Lash price before the photo');
 assert(lashesGraph.find(v=>v['@type']==='Service').serviceType.includes('Extensiones de pestañas de volumen'));
@@ -191,7 +210,7 @@ const lashGuide=fs.readFileSync(path.join(root,'guias/lifting-o-extensiones-pest
 const lashGuideGraph=JSON.parse(lashGuide.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'];
 const guideTint=lashGuideGraph.find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Se puede combinar el lifting con tinte?').acceptedAnswer.text;
 assert.equal(lashGuide.match(/<summary>¿Se puede combinar lifting con tinte\?<\/summary><p>([^]*?)<\/p>/)[1],guideTint,'Guide visible and structured tint inclusion must agree');
-assert(guideTint.includes('incluye tinte vegano por 55 €')&&guideTint.includes('no se suma a los 55 €'));
+assert(guideTint.includes('con tinte vegano por 55 €')&&guideTint.includes('sin tinte por 45 €')&&guideTint.includes('45 minutos')&&guideTint.includes('1 hora')&&guideTint.includes('no se suma a los 55 €'));
 assert(lashGuide.includes('55 € · aproximadamente 1 hora · tinte incluido')&&lashGuide.includes('55 € · primera puesta alrededor de 90 minutos'));
 for(const fragment of ['pelo-a-pelo','volumen','click-lash'])assert(lashGuide.includes('extensiones-pestanas-granollers.html#'+fragment));
 const guideImage=lashGuideGraph.find(v=>v['@type']==='Article').image;

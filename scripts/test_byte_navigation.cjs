@@ -30,7 +30,7 @@ for (const file of ["facial-contouring-granollers.html", "micropigmentacion-blus
 }
 for (const [file, expected] of [
   ["pestanas-granollers.html", /pestañas/],
-  ["lifting-pestanas-granollers.html", /lifting coreano con tinte/],
+  ["lifting-pestanas-granollers.html", /valoración gratuita.*lifting de pestañas.*con tinte o sin tinte/],
   ["extensiones-pestanas-granollers.html", /extensiones pelo a pelo, volumen y Click Lash/]
 ]) {
   const html = read("tratamientos/" + file);
@@ -68,3 +68,23 @@ assert.match(read("tratamientos/seo-treatment.css"), /html\{scroll-padding-top:1
 // The cookie notice must clear the contact bar throughout its 760px breakpoint.
 assert.ok(/@media\(max-width:760px\)\{\.nohuska-cookie-banner\{[^}]*bottom:78px/.test(read("assets/nohuska-conversiones.js")), "Cookie notice must clear the contact bar at widths up to 760px");
 console.log("PASS: firmas destinations, mobile contact routes/messages, responsive rule and lifting labels (static markup).");
+
+// La barra fija de lifting nunca debe competir con los contactos del contenido.
+const lifting=read("tratamientos/lifting-pestanas-granollers.html");
+assert.match(lifting, /class="mobile-contact" hidden/);
+assert.match(lifting, /\.mobile-contact\[hidden\]\{display:none\}/);
+assert.match(lifting, /footer \.nohuska-cookie-settings\{position:static/);
+const visibility=lifting.match(/<script data-mobile-contact-visibility>([\s\S]*?)<\/script>/)[1];
+const floating={hidden:true},preferences={},contacts=[{},{}],observed=[];
+let callback,moved=false;
+function Observer(fn,options){callback=fn;assert.equal(options.rootMargin,"-70px 0px 0px");this.observe=node=>observed.push(node);}
+require("node:vm").runInNewContext(visibility,{
+ window:{IntersectionObserver:Observer},IntersectionObserver:Observer,
+ document:{addEventListener:(_,fn)=>fn(),querySelector:s=>s===".mobile-contact"?floating:s===".nohuska-cookie-settings"?preferences:{appendChild:n=>{assert.equal(n,preferences);moved=true;}},querySelectorAll:()=>contacts}
+});
+assert(moved);assert.deepEqual(observed,[...contacts,preferences]);
+callback([{target:contacts[0],isIntersecting:true}]);assert(floating.hidden);
+callback([{target:contacts[1],isIntersecting:true},{target:contacts[0],isIntersecting:false}]);assert(floating.hidden);
+callback([{target:contacts[1],isIntersecting:false}]);assert(!floating.hidden);
+callback([{target:preferences,isIntersecting:true}]);assert(floating.hidden);
+console.log("PASS: lifting floating contact yields to visible contacts, selector and cookie preferences.");

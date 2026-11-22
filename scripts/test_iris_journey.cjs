@@ -7,14 +7,15 @@ const assert = require("node:assert/strict");
 const read = file => fs.readFileSync(path.join(__dirname, "..", file), "utf8");
 const script = read("assets/nohuska-recorrido.js");
 let cases = 0;
-for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.html", "micropigmentacion-cejas-granollers.html"]) {
+for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.html", "micropigmentacion-cejas-granollers.html", "lifting-pestanas-granollers.html"]) {
   const html = read("tratamientos/" + file);
   assert.match(html, /<label for="consultation-choice">/);
   assert.ok(html.indexOf("nohuska-conversiones.js") < html.indexOf("nohuska-recorrido.js"));
   const options = [...html.matchAll(/<option (?:id="([^"]+)" )?value="([^"]*)">([^<]*)<\/option>/g)].map(m => ({ id: m[1], value: m[2], textContent: m[3] }));
   const priced = /<select\b[^>]*\bdata-priced-options\b/.test(html);
   const pmu = file === "micropigmentacion-cejas-granollers.html";
-  assert.equal(priced, pmu || file === "extensiones-pestanas-granollers.html");
+  const lifting = file === "lifting-pestanas-granollers.html";
+  assert.equal(priced, pmu || lifting || file === "extensiones-pestanas-granollers.html");
   if (priced) {
     assert.equal(options[0].value, ""); assert.doesNotMatch(options[0].textContent, /€/);
     const hero = html.match(/<section class="hero">([\s\S]*?)<\/section>/)[1];
@@ -25,6 +26,11 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
       ["extensiones-pelo-a-pelo", "Extensiones pelo a pelo · 55 €"], ["extensiones-volumen", "Extensiones de volumen · 55 €"],
       ["click-lash", "Click Lash · 35 €"], ["extensiones-pestanas", "Relleno de extensiones · 35 €"],
       ["extensiones-pestanas", "Retirada de extensiones · 15 €"]
+    ]);
+  } else if (lifting) {
+    assert.deepEqual(options.slice(1).map(o => [o.id, o.value, o.textContent]), [
+      ["opcion-lifting-sin-tinte", "lifting-pestanas", "Lifting coreano sin tinte · 45 €"],
+      ["opcion-lifting-con-tinte", "lifting-pestanas", "Lifting coreano con tinte vegano · 55 €"]
     ]);
   } else if (pmu) {
     assert.deepEqual(options.slice(1).map(o => o.textContent).sort(), [
@@ -49,16 +55,36 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
       for (const label of pmuActions) assert.equal(originals.filter(link => link.textContent === label).length, 1);
     }
     if (priced) {
-      if (!pmu) assert.ok(originals.some(link => link.textContent === "Consultar volumen y estilos"));
+      if (file === "extensiones-pestanas-granollers.html") assert.ok(originals.some(link => link.textContent === "Consultar volumen y estilos"));
       const general = originals.filter(link => link.dataset.contactIntent === "appointment" && link.dataset.fixedConsultation === undefined);
       assert.equal(general.length, 2);
       for (const link of general) assert.doesNotMatch(link.textContent + new URL(link.href).searchParams.get("text"), /€/, "Do not quote a price before choosing a technique");
     }
     const listeners = {};
     const choice = { options, dataset: priced ? { pricedOptions: "" } : {}, selectedIndex: 0, get value() { return options[this.selectedIndex].value; }, set value(v) { this.selectedIndex = options.findIndex(o => o.value === v); }, addEventListener: (name, fn) => { listeners[name] = fn; } };
-    const sections = new Map([...html.matchAll(/<(?:section|div|p)\b[^>]*id="([^"]+)"[^>]*data-consultation-value="([^"]+)"/g)].map(m => [m[1], { dataset: { consultationValue: m[2] } }]));
+    const sections = new Map([...html.matchAll(/<(?:section|div|p|tr)\b[^>]*id="([^"]+)"[^>]*data-consultation-value="([^"]+)"/g)].map(m => [m[1], { dataset: { consultationValue: m[2] } }]));
     const location = { hash: "" };
     const start = () => vm.runInNewContext(script, { URL, document: { querySelector: () => choice, querySelectorAll: () => links, getElementById: id => sections.get(id) }, window: { location, addEventListener: (name, fn) => { listeners[name] = fn; } } });
+    if (lifting) {
+      for (const [hash, label] of [["#lifting-sin-tinte", "Lifting coreano sin tinte · 45 €"], ["#lifting-con-tinte", "Lifting coreano con tinte vegano · 55 €"]]) {
+        location.hash = hash; start();
+        assert.equal(options[choice.selectedIndex].textContent, label, "Keep the lifting variant when both share an attribution code");
+        for (const [i, link] of links.entries()) {
+          if (originals[i].dataset.fixedConsultation !== undefined) { assert.deepEqual(link, originals[i]); continue; }
+          const message = new URL(link.href).searchParams.get("text");
+          assert(message.includes(label.split(" · ")[0]));
+          if (link.dataset.contactIntent === "appointment") assert(message.includes(label));
+          if (withReference) assert(message.endsWith("Referencia: WEB-LIFTING-PESTANAS-GRANOLLERS-INSTAGRAM-SOCIAL"));
+        }
+        choice.selectedIndex = 1; listeners.change();
+        location.hash = "#lifting-con-tinte"; listeners.hashchange(); listeners.pageshow();
+        assert.equal(choice.selectedIndex, 1, "A manual lifting choice wins over later section navigation");
+        choice.selectedIndex = 0; listeners.change();
+        listeners.hashchange(); listeners.pageshow();
+        assert.deepEqual(links, originals, "Returning to advice must not force a tint option or price");
+      }
+      location.hash = "";
+    }
     if (file === "extensiones-pestanas-granollers.html") {
       for (const [fragment, service] of [["pelo-a-pelo","extensiones-pelo-a-pelo"], ["volumen","extensiones-volumen"], ["click-lash","click-lash"], ["relleno","extensiones-pestanas"], ["cuidados-extensiones",""]]) {
         location.hash = "#" + fragment;
@@ -140,7 +166,7 @@ for (const file of ["cejas-granollers.html", "extensiones-pestanas-granollers.ht
           const message = url.searchParams.get("text").split("\n\nReferencia: WEB-")[0];
           const original = originals[index];
           if (original.dataset.keepMessage !== undefined) {
-            assert(pmuActions.includes(original.textContent));
+            assert(pmuActions.includes(original.textContent) || (lifting && original.textContent === "Consultar mi caso"));
             assert.equal(link.textContent, original.textContent, "Preserve the action to send photographs or request a quote");
             assert.equal(message, new URL(original.href).searchParams.get("text").split("\n\nReferencia: WEB-")[0] + "\nMe interesa: " + name + ".");
           } else if (original.dataset.contactIntent === "appointment" && price === "A valorar") {
@@ -185,7 +211,7 @@ const pmuHero=read("tratamientos/micropigmentacion-cejas-granollers.html").match
 assert(pmuHero.includes('href="nohuska-natural-brow-granollers.html">¿Buscabas laminado') && pmuHero.indexOf('¿Buscabas laminado')<pmuHero.indexOf('https://wa.me/'),'Provide the no-pigment route before a visitor starts a PMU enquiry');
 const lashGuide = read("guias/lifting-o-extensiones-pestanas.html");
 const lashClosing = lashGuide.match(/<section class="cta">([\s\S]*?)<\/section>/)[1];
-assert(lashClosing.includes('href="../tratamientos/extensiones-pestanas-granollers.html"') && lashClosing.includes('>Consultar lifting con tinte</a>'), "Offer extensions without relabelling a lifting enquiry");
+assert(lashClosing.includes('href="../tratamientos/extensiones-pestanas-granollers.html"') && lashClosing.includes('>Consultar lifting con o sin tinte</a>'), "Offer extensions without relabelling a lifting enquiry");
 assert(new URL(lashGuide.match(/class="mobile-contact"[^>]*href="([^"]+)"/)[1]).searchParams.get("text").includes("volumen"));
 const home = read("index.html");
 const heroActions=home.match(/<div class="hero-actions">([\s\S]*?)<\/div>/)[1];
@@ -224,7 +250,7 @@ assert.match(lashes, /data-service="extensiones-pestanas" data-cta-position="her
 assert.match(lashes, /data-service="extensiones-pestanas" data-cta-position="alternativa-pestanas"/);
 const maintenanceMessage=new URL(lashes.match(/data-cta-position="alternativa-pestanas"[^>]*href="([^"]+)"/)[1]).searchParams.get('text');
 assert(/relleno/.test(maintenanceMessage) && /retirada/.test(maintenanceMessage),'Maintenance enquiries must not become a new first placement');
-for(const [position,service,words] of [['cierre-guia-extensiones','extensiones-pestanas',/solicitar cita.*pelo a pelo o volumen/],['cierre-guia-lifting','lifting-pestanas',/consultar disponibilidad.*lifting coreano con tinte/]]){
+for(const [position,service,words] of [['cierre-guia-extensiones','extensiones-pestanas',/solicitar cita.*pelo a pelo o volumen/],['cierre-guia-lifting','lifting-pestanas',/consultar.*lifting.*con tinte o sin tinte/]]){
  const link=lashGuide.match(new RegExp('<a[^>]*data-cta-position="'+position+'"[^>]*>'))[0];
  assert(link.includes('data-service="'+service+'"') && link.includes('data-fixed-consultation'));
  assert.match(new URL(link.match(/href="([^"]+)"/)[1]).searchParams.get('text'),words);
