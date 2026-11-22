@@ -60,7 +60,7 @@ assert.equal([...barcelona.matchAll(/<img\b[^>]*src="\.\.\/assets\/nanoblading-c
 assert(barcelona.indexOf('src="../assets/nanoblading-cejas-antes-despues-nohuska.jpg"')<barcelona.indexOf('<div class="facts">'),'Barcelona must show the real case in the hero');
 assert(barcelona.includes('id="caso-nanoblading"'),'Keep the existing case-context fragment');
 const regionalBrows=fs.readFileSync(path.join(root,'tratamientos/cejas-valles-oriental.html'),'utf8');
-assert(regionalBrows.includes('href="nohuska-natural-brow-granollers.html">Natural Brow: diseño, laminado y tinte'));
+assert(regionalBrows.includes('href="nohuska-natural-brow-granollers.html#natural-brow-con-tinte">Natural Brow con tinte'));
 assert(regionalBrows.includes('55 € · aproximadamente 1 hora')&&regionalBrows.includes('Repaso no incluido'));
 const generalBrows=fs.readFileSync(path.join(root,'tratamientos/cejas-granollers.html'),'utf8');
 assert(!generalBrows.includes('href="nohuska-natural-brow-granollers.html#laminado-tinte"'),'Enter the service at its offer and evidence, rather than skipping them');
@@ -127,7 +127,7 @@ for(const file of ['nohuska-natural-brow-granollers.html','lifting-pestanas-gran
 }
 const naturalSnippet=fs.readFileSync(path.join(root,'tratamientos/nohuska-natural-brow-granollers.html'),'utf8');
 assert.equal([...naturalSnippet.matchAll(/<div class="fact" data-nosnippet>/g)].length,2,'Exclude only the duplicate price/time cards from snippets');
-assert(naturalSnippet.includes('con diseño y tinte incluidos'),'Natural Brow summary must make the package scope explicit');
+assert(naturalSnippet.includes('Natural Brow incluye visagismo, diseño, laminado, depilación y tinte de cejas'),'Natural Brow must make the complete package scope explicit');
 assert(!/<(?:main|body)[^>]*data-nosnippet/.test(naturalSnippet),'Keep the treatment content available for search snippets');
 const bcnNanoTime=barcelonaGraph.find(v=>v["@type"]==="FAQPage").mainEntity.find(v=>v.name==="¿Cuánto tiempo debo reservar para nanoblading?").acceptedAnswer.text;
 assert.equal(barcelona.match(/<summary>¿Cuánto tiempo debo reservar para nanoblading\?<\/summary><p>([^]*?)<\/p>/)[1],bcnNanoTime);
@@ -170,7 +170,7 @@ for(const [name,price,fragment] of [['Click Lash','35','click-lash'],['Extension
 const liftingHero=liftingPage.match(/<section class="hero">([^]*?)<\/section>/)[1];
 const liftingLimits=JSON.parse(liftingPage.match(/type="application\/ld\+json"[^>]*>([^]*?)<\/script>/i)[1])['@graph'].find(v=>v['@type']==='FAQPage').mainEntity.find(v=>v.name==='¿Qué desventajas tiene el lifting de pestañas?').acceptedAnswer.text;
 assert.equal(liftingPage.match(/<summary>¿Qué desventajas tiene el lifting de pestañas\?<\/summary><p>([^]*?)<\/p>/)[1],liftingLimits,'Visible and structured lifting limitations must agree');
-for(const [name,price,url] of [['Lifting de pestañas · Lash Lift','55','lifting-pestanas-granollers.html'],['Nohuska Korean Gaze™','85','nohuska-korean-gaze-granollers.html'],['Laminado de cejas','45','nohuska-natural-brow-granollers.html#laminado-sin-tinte'],['Natural Brow™','55','nohuska-natural-brow-granollers.html'],['Tinte híbrido','35','tinte-hibrido-cejas-granollers.html']]){
+for(const [name,price,url] of [['Lifting de pestañas · Lash Lift','55','lifting-pestanas-granollers.html'],['Nohuska Korean Gaze™','85','nohuska-korean-gaze-granollers.html'],['Laminado de cejas','45','nohuska-natural-brow-granollers.html#laminado-sin-tinte'],['Natural Brow™','55','nohuska-natural-brow-granollers.html#natural-brow-con-tinte'],['Tinte híbrido','35','tinte-hibrido-cejas-granollers.html']]){
  const card=[...home.matchAll(/<details class="treatment-item">([^]*?)<\/details>/g)].find(m=>m[1].includes('class="treatment-name">'+name+'</span>'));
  assert(card&&card[1].includes(price+' €')&&card[1].includes('href="tratamientos/'+url+'"'),'Homepage commercial cards must expose their confirmed offer and matching detail page');
 }
@@ -236,14 +236,24 @@ assert(naturalPrice.includes('servicio completo Natural Brow es de 55 €')&&nat
 const naturalDuration=naturalFaq.mainEntity.find(v=>v.name==='¿Cuánto dura el resultado del laminado y del tinte?').acceptedAnswer.text;
 assert(naturalDuration.includes('5–6 semanas')&&naturalDuration.includes('tinte sobre la piel')&&naturalDuration.includes('7–9 días')&&naturalDuration.includes('no describe su duración sobre el pelo'));
 assert(naturalFaq.mainEntity.find(v=>v.name==='¿Qué cuidados indicáis después de Natural Brow?').acceptedAnswer.text.includes('primeras 48 horas'));
-const naturalChoice=naturalSnippet.match(/<section[^>]*aria-labelledby="elegir-natural-brow"[^>]*>([^]*?)<\/section>/)[1];
-const browAdvice=new URL(naturalChoice.match(/href="(https:\/\/wa\.me\/[^"]+)"/)[1]);
+const naturalFinish=naturalSnippet.match(/<section[^>]*aria-labelledby="elegir-natural-brow"[^>]*>([^]*?)<\/section>/)[1];
+assert(naturalFinish.includes('fluffy') && naturalFinish.includes('pelo disponible') && naturalFinish.includes('tono y la intensidad') && naturalFinish.includes('data-consultation-finish'));
+const naturalHero=naturalSnippet.match(/<section class="hero">([^]*?)<\/section>/)[1];
+for (const detail of ['Sin tinte: 45 €', 'con tinte: 55 €', 'aproximadamente 1 hora', 'visagismo, diseño personalizado, depilación y laminado']) assert(naturalHero.includes(detail));
+for (const anchor of ['laminado-sin-tinte','natural-brow-con-tinte']) assert(naturalHero.includes('id="'+anchor+'" data-consultation-value="opcion-'+anchor+'"'));
+const browAdvice=new URL(naturalHero.match(/data-contact-intent="valuation"[^>]*href="(https:\/\/wa\.me\/[^"]+)"/)[1]);
 assert(browAdvice.pathname==='/34624011715' && /valoración gratuita/i.test(browAdvice.searchParams.get('text')) && /laminado/i.test(browAdvice.searchParams.get('text')) && !/micropigmentación/i.test(browAdvice.searchParams.get('text')),'Brow advice must not assume the client requested PMU');
+const naturalChoice=naturalSnippet.match(/<section[^>]*aria-labelledby="alternativas-cejas"[^>]*>([^]*?)<\/section>/)[1];
 assert(naturalChoice.includes('<caption>Qué opción valorar según tu objetivo</caption>'));
-assert.equal([...naturalChoice.matchAll(/<th scope="row">/g)].length,5,'The no-tint lamination has a distinct scope and price');
-for(const offer of ['Laminado sin tinte · 45 €','Natural Brow™ · 55 € · aprox. 1 hora','Korean Gaze™ · 85 € · aprox. 90 minutos'])assert(naturalChoice.includes(offer),'Choice table must show the confirmed package scope and appointment time');
+assert.equal([...naturalChoice.matchAll(/<th scope="row">/g)].length,3,'Keep other intentions secondary without repeating the two main offers');
+assert(naturalChoice.includes('Korean Gaze™ · 85 € · aprox. 90 minutos'));
 for(const target of ['cejas-granollers.html','tinte-hibrido-cejas-granollers.html#tinte-cejas-solo','nohuska-korean-gaze-granollers.html','micropigmentacion-cejas-granollers.html'])assert(naturalChoice.includes('href="'+target+'"'),'Alternative intentions must point to their existing service, not compete on this page');
-assert(naturalChoice.includes('El tinte está incluido en los 55 €, no es un suplemento')&&naturalChoice.includes('No incluye extensiones ni micropigmentación'));
+assert(naturalPrice.includes('El tinte no se suma como un suplemento')&&naturalChoice.includes('No incluye extensiones ni micropigmentación'));
+assert(naturalSnippet.indexOf('id="resultados-natural-brow"')<naturalSnippet.indexOf('id="elegir-natural-brow"') && naturalSnippet.indexOf('id="preguntas-natural-brow"')<naturalSnippet.indexOf('id="alternativas-cejas"'),'Show the own evidence first and reserve alternatives for after the essential care');
+for (const question of ['¿Puedo reservar laminado de cejas sin tinte?', '¿Puedo elegir un acabado natural o más elevado?', '¿Cuánto dura la cita con o sin tinte?']) {
+ const answer=naturalFaq.mainEntity.find(v=>v.name===question).acceptedAnswer.text;
+ assert(naturalSnippet.includes('<summary>'+question+'</summary><p>'+answer+'</p>'));
+}
 assert(!naturalSnippet.includes('sin un procedimiento semipermanente'),'Distinguish laminating from micropigmentation, not by claiming it has no temporary effect');
 for(const file of ['lifting-pestanas-granollers.html','nohuska-natural-brow-granollers.html']){
  const html=fs.readFileSync(path.join(root,'tratamientos',file),'utf8');

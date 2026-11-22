@@ -69,12 +69,14 @@ assert.match(read("tratamientos/seo-treatment.css"), /html\{scroll-padding-top:1
 assert.ok(/@media\(max-width:760px\)\{\.nohuska-cookie-banner\{[^}]*bottom:78px/.test(read("assets/nohuska-conversiones.js")), "Cookie notice must clear the contact bar at widths up to 760px");
 console.log("PASS: firmas destinations, mobile contact routes/messages, responsive rule and lifting labels (static markup).");
 
-// La barra fija de lifting nunca debe competir con los contactos del contenido.
-const lifting=read("tratamientos/lifting-pestanas-granollers.html");
+// Las barras fijas no deben competir con los contactos ni los campos del contenido.
+for (const file of ["lifting-pestanas-granollers.html", "nohuska-natural-brow-granollers.html"]) {
+const lifting=read("tratamientos/" + file);
 assert.match(lifting, /class="mobile-contact" hidden/);
 assert.match(lifting, /\.mobile-contact\[hidden\]\{display:none\}/);
 assert.match(lifting, /footer \.nohuska-cookie-settings\{position:static/);
 const visibility=lifting.match(/<script data-mobile-contact-visibility>([\s\S]*?)<\/script>/)[1];
+if (file.startsWith("nohuska-natural")) assert(visibility.includes("main input"));
 const floating={hidden:true},preferences={},contacts=[{},{}],observed=[];
 let callback,moved=false;
 function Observer(fn,options){callback=fn;assert.equal(options.rootMargin,"-70px 0px 0px");this.observe=node=>observed.push(node);}
@@ -87,4 +89,5 @@ callback([{target:contacts[0],isIntersecting:true}]);assert(floating.hidden);
 callback([{target:contacts[1],isIntersecting:true},{target:contacts[0],isIntersecting:false}]);assert(floating.hidden);
 callback([{target:contacts[1],isIntersecting:false}]);assert(!floating.hidden);
 callback([{target:preferences,isIntersecting:true}]);assert(floating.hidden);
-console.log("PASS: lifting floating contact yields to visible contacts, selector and cookie preferences.");
+}
+console.log("PASS: lifting and lamination floating contacts yield to visible contacts, selection controls and cookie preferences.");
